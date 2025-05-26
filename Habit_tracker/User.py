@@ -1,14 +1,32 @@
+from DataStorage import DataBase
+Data = DataBase()
+
+
 class User: 
     def __init__(self):
-        self.userID
-        self.name
-        self.email
-        self.password
-        self.preferences 
+        self.userID = None
+        self.name = None
+        self.email = None
+        self.password = None
+        self.preference = None
 
     def register(self):
         #creating a new User for using the HabitTracker and saving Data into Database
-        pass
+        print("Registration:")
+        self.name = input("Name: ")
+        self.email = input("Email: ")
+        self.password = input("Password: ")
+        
+        self.userID = {"ID": "user",
+                       "name" : self.name,
+                       "email": self.email,
+                       "password": self.password}
+
+        Data.saveData(data= self.userID)
+
+
+
+        
     
     def login(self):
         #checked if User is already register, 
@@ -16,7 +34,7 @@ class User:
 
     def showProfile(self):
         #show all Informarion about the User 
-        pass
+        return self.userID
 
     def updatePreferences(self):
         #Updating new Preferences or adding more {have more clear}
@@ -35,3 +53,5 @@ class User:
     def deleteHabit(self):
         #deleting Habit which is created from the User
         pass
+
+
