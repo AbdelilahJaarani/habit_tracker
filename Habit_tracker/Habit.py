@@ -1,6 +1,5 @@
-
-
-
+from habitTemplate import HabitTemplate
+ht = HabitTemplate()
 
 
 
@@ -8,14 +7,15 @@ class habit:
     def __init__(self):
         self.habitID
         self.name
-        self.category
+        self.category = ht.listCatergory()
         self.description
-        self.periodicity
+        self.periodicity = ht.listPeriodicity()
         self.status
         self.startDate
 
     def add(self):
         #creating a new Habit by the User
+        
         pass
 
     def delete(self):

@@ -1,4 +1,5 @@
 import sqlite3
+import os
 
 class DataBase:
     def __init__(self):
@@ -10,18 +11,34 @@ class DataBase:
         cursor = self.cursor
         try:
             if data["ID"] == "user":
-                cursor.execute(f"INSERT INTO USER (name,email,password) VALUES ('{data["name"]}', '{data ["email"]}', '{data["password"]}')")
-                self.sqliteConnection.commit()
-                print("Query executed successfully.")
+                cursor.execute("SELECT email FROM USER WHERE email = ?", (data["email"],))
+                result = cursor.fetchone()
+                if result:
+                    os.system('cls')
+                    print(f"The email: '{data["email"]}' is already used. Please use another one")
+                    return False, data
+                else:
+                    cursor.execute(f"INSERT INTO USER (name,email,password) VALUES ('{data["name"]}', '{data ["email"]}', '{data["password"]}')")
+                    self.sqliteConnection.commit()
+                    print("Registartion was sucessfull!")
+                    return True, data
         except sqlite3.IntegrityError as e:
             print(f"Integrity Error: {e}")
+            return False, None
         except sqlite3.OperationalError as e:
             print(f"Operational Error: {e}")
+            return False, None
         
 
-    def loadData(self):
+    def loadData(self,data):
+        cursor = self.cursor
         try:
-            pass
+            if data["ID"] == "user":
+                cursor.execute(f"SELECT email, password FROM USER WHERE email = {data["email"]} AND password = {data["password"]}")
+                result = cursor.fetchall()
+                if result is None:
+                    print("No Entry found")
+                    return False
         except sqlite3.IntegrityError as e:
             print(f"Integrity Error: {e}")
         except sqlite3.OperationalError as e:

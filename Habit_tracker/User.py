@@ -1,5 +1,8 @@
 from DataStorage import DataBase
+from Habit import habit
+import os
 Data = DataBase()
+#hb = habit()
 
 
 class User: 
@@ -22,15 +25,30 @@ class User:
                        "email": self.email,
                        "password": self.password}
 
-        Data.saveData(data= self.userID)
+        completedRegistration , data = Data.saveData(data= self.userID)
+        if completedRegistration:
+            return True, data
+        else:
+            return False, None
+
 
 
 
         
     
     def login(self):
-        #checked if User is already register, 
-        pass
+        #checked if User is already register
+        print("Login")
+        self.email = input("Email: ")
+        self.password = input("Password: ")
+
+        self.userID = {"ID": "user",
+                       "email": self.email,
+                       "password": self.password}    
+
+        if not Data.loadData(data=self.userID):
+            return False
+
 
     def showProfile(self):
         #show all Informarion about the User 
@@ -43,6 +61,7 @@ class User:
 
     def addHabit(self):
         #adding Habit from the Class Habit.py into the Database
+        hb.add()
         pass
 
     def viewHabits(self):
