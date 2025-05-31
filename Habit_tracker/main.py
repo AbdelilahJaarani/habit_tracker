@@ -1,6 +1,6 @@
 import os
-from User import user
-user = user()
+from user import User
+user = User()
 
 
 print("HABIT TRACKER")

@@ -1,11 +1,11 @@
-from DataStorage import DataBase
-from Habit import habit
+from dataStorage import DataBase
+from habit import habit
 import os
 Data = DataBase()
 #hb = habit()
 
 
-class user: 
+class User: 
     def __init__(self):
         self.userID = None
         self.name = None
