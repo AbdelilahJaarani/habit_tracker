@@ -1,6 +1,6 @@
 import os
-from User import User
-user = User()
+from User import user
+user = user()
 
 
 print("HABIT TRACKER")
@@ -17,12 +17,13 @@ while not registration or not login:
             print(f"Welcome {data["name"]} !")
 
     elif choice == "l":
-            if user.login():
-                os.system('cls')
-                login = True
+            os.system('cls')
+            if user.login() == False:
+                print("Email or Password are wrong please try again")
+                #os.system('cls')
+            else: 
+                 login = True
     else:
          os.system('cls')
          print("OOps wrong Input please try again! ")
         
-
-

@@ -34,11 +34,13 @@ class DataBase:
         cursor = self.cursor
         try:
             if data["ID"] == "user":
-                cursor.execute(f"SELECT email, password FROM USER WHERE email = {data["email"]} AND password = {data["password"]}")
-                result = cursor.fetchall()
+                cursor.execute("SELECT email, password FROM USER WHERE email = ? AND password = ?", (data["email"], data["password"]))
+                result = cursor.fetchone()
                 if result is None:
-                    print("No Entry found")
                     return False
+                else:
+                    print("Login was sucessfull")
+                    return True, data
         except sqlite3.IntegrityError as e:
             print(f"Integrity Error: {e}")
         except sqlite3.OperationalError as e:

@@ -7,6 +7,7 @@ class HabitTemplate:
         
     
     def listCatergory(self):
+        #list of category that the user can use
         habit_categories = [
             "Health & Fitness",
             "Nutrition",
@@ -24,6 +25,7 @@ class HabitTemplate:
     
     
     def listPeriodicity(self):
+        #list of periodicity that the user can use
         periodicty = ["daily", "weekly", "monthly"]
         self.peridicity = periodicty
         return periodicty
@@ -35,27 +37,27 @@ class HabitTemplate:
             "category": "Health & Fitness",
             "habits": [
                 "Morning stretch routine: 5-10 minutes of stretching after waking up",
-                "Interval training (HIIT) 2-3 times per week",
-                "Walk at least 10,000 steps daily",
-                "Go to bed at the same time every day (aim for 7-8 hours of sleep)"
+                "Interval training (HIIT)",
+                "Walk at least 10,000 steps",
+                "Go to bed at the same time (aim for 7-8 hours of sleep)"
             ]
         },
         {
             "category": "Nutrition",
             "habits": [
-                "Drink at least 2-3 liters of water daily",
-                "Prepare meals weekly (meal prep)",
+                "Drink at least 2-3 liters of water",
+                "Prepare meals",
                 "Make at least 50% of every meal vegetables",
-                "Limit processed sugar and sweets to 1-2 times per week"
+                "Limit processed sugar and sweets"
             ]
         },
         {
             "category": "Personal Development",
             "habits": [
-                "Read for 15-30 minutes every day",
-                "Spend 5 minutes journaling every evening",
-                "Make weekly progress learning a new skill",
-                "Reflect on personal goals and progress for 10 minutes weekly"
+                "Read for 15-30 minutes ",
+                "Spend 5 minutes journaling ",
+                "Make progress learning a new skill",
+                "Reflect on personal goals and progress for 10 minutes "
             ]
         },
         {
@@ -63,8 +65,8 @@ class HabitTemplate:
             "habits": [
                 "Use the Pomodoro technique: 25 minutes work, 5 minutes break",
                 "Set the three most important tasks every morning",
-                "Check emails only 2-3 times per day",
-                "Organize your desk for 5 minutes daily"
+                "Check emails only 2-3 times",
+                "Organize your desk for 5 minutes "
             ]
         },
         {
@@ -72,7 +74,7 @@ class HabitTemplate:
             "habits": [
                 "Spend 10 minutes daily tidying up a specific area",
                 "Schedule fixed days for laundry and folding",
-                "Declutter one box of items monthly",
+                "Declutter one box of items",
                 "Check off weekly cleaning tasks in a calendar"
             ]
         },
@@ -80,17 +82,17 @@ class HabitTemplate:
             "category": "Finances",
             "habits": [
                 "Track all expenses immediately or use an app",
-                "Automatically save a fixed amount every month",
-                "Review income and expenses monthly",
+                "Automatically save a fixed amount ",
+                "Review income and expenses",
                 "Apply the 24-hour rule before major purchases"
             ]
         },
         {
             "category": "Social & Relationships",
             "habits": [
-                "Contact at least one person daily (call, message, or meet)",
+                "Contact at least one person (call, message, or meet)",
                 "Practice active listening in conversations",
-                "Thank someone or give a compliment at least once a week",
+                "Thank someone or give a compliment",
                 "Regularly schedule time for friends or family"
             ]
         },
@@ -98,15 +100,15 @@ class HabitTemplate:
             "category": "Creativity & Hobbies",
             "habits": [
                 "Reserve 15-30 minutes daily for a hobby",
-                "Note down new ideas or inspirations every day",
-                "Try a new creative technique or hobby monthly",
+                "Note down new ideas or inspirations ",
+                "Try a new creative technique or hobby ",
                 "Participate in creative challenges"
             ]
         },
         {
             "category": "Self-care & Well-being",
             "habits": [
-                "Practice meditation or breathing exercises for 5-10 minutes daily",
+                "Practice meditation or breathing exercises for 5-10 minutes",
                 "Have one hour of screen-free time each day",
                 "Say positive affirmations to yourself in the morning",
                 "Take a short break every 60-90 minutes"
@@ -115,23 +117,21 @@ class HabitTemplate:
         {
             "category": "Miscellaneous / Custom",
             "habits": [
-                "Review progress in all life areas weekly",
-                "Write down three things you are grateful for every day",
-                "Do one eco-friendly action daily",
-                "Practice a foreign language for 5-10 minutes daily"
+                "Review progress in all life areas ",
+                "Write down three things you are grateful",
+                "Do one eco-friendly action ",
+                "Practice a foreign language for 5-10 minutes"
             ]
         }
         ]
         return habits
-
-hb = HabitTemplate()
-rdHabit = hb.ListTemplates()
-newTemplate = {}
-#newTemplate[random.choice(rdHabit["category"])] = random.choice(rdHabit["habits"])
-oneDict = random.choice(rdHabit)
-newCategory = oneDict["category"]
-newHabit = random.choice(oneDict["habits"])
-
-print(oneDict)
-print(newCategory)
-print(newHabit)
+    
+    def TemplatesExamples(self):
+        #creating a example template for us if he needs an inspiration
+        rdHabit = self.ListTemplates()
+        newTemplate = {}
+        oneDict = random.choice(rdHabit)
+        newCategory = oneDict["category"]
+        newHabit = random.choice(oneDict["habits"])
+        newTemplate[newCategory] = newHabit
+        return newTemplate

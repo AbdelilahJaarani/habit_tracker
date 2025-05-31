@@ -5,13 +5,14 @@ Data = DataBase()
 #hb = habit()
 
 
-class User: 
+class user: 
     def __init__(self):
         self.userID = None
         self.name = None
         self.email = None
         self.password = None
         self.preference = None
+        
 
     def register(self):
         #creating a new User for using the HabitTracker and saving Data into Database
@@ -29,12 +30,7 @@ class User:
         if completedRegistration:
             return True, data
         else:
-            return False, None
-
-
-
-
-        
+            return False, None     
     
     def login(self):
         #checked if User is already register
@@ -48,6 +44,8 @@ class User:
 
         if not Data.loadData(data=self.userID):
             return False
+        else: 
+            return True
 
 
     def showProfile(self):
@@ -61,7 +59,6 @@ class User:
 
     def addHabit(self):
         #adding Habit from the Class Habit.py into the Database
-        hb.add()
         pass
 
     def viewHabits(self):
