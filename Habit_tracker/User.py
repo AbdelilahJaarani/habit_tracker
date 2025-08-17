@@ -1,6 +1,7 @@
 from dataStorage import DataBase
-from habit import habit
+from habit import Habit
 import os
+import random
 Data = DataBase()
 #hb = habit()
 
@@ -21,14 +22,16 @@ class User:
         self.email = input("Email: ")
         self.password = input("Password: ")
         
-        self.userID = {"ID": "user",
+        self.userID = {"ID":"user" ,
                        "name" : self.name,
                        "email": self.email,
                        "password": self.password}
 
-        completedRegistration , data = Data.saveData(data= self.userID)
+        completedRegistration , user_data = Data.saveData_User(data= self.userID)
         if completedRegistration:
-            return True, data
+            os.system('cls')
+            print("Registartion was sucessfull!")
+            return True, user_data
         else:
             return False, None     
     
@@ -41,33 +44,47 @@ class User:
         self.userID = {"ID": "user",
                        "email": self.email,
                        "password": self.password}    
+        
+        user_data = Data.loadData_User(data=self.userID)
 
-        if not Data.loadData(data=self.userID):
+        if not user_data:
             return False
         else: 
-            return True
+            os.system('cls')
+            print("Login was sucessfully")
+            dt = user_data
+            return True, dt
 
 
     def showProfile(self):
         #show all Informarion about the User 
         return self.userID
 
-    def updatePreferences(self):
+    def updatePreferences(self, user_data):
         #Updating new Preferences or adding more {have more clear}
+        updateNr = input("What do you want to change\n [1] Name \n [2] Email \n [3] Password")
+        if updateNr == 1:
+            os.system('cls')
+            self.userID["name"] = input("Please write your new name")
+            check = input(f"Are you sure that you want to change you name into {self.userID["name"]}? \n y/n ")
+            if check == "y":
+                if not Data.UpdateData_User(data=self.userID): #Update into the DB
+                    return False
+    
+    def deleteUser(self):
         pass
 
-
-    def addHabit(self):
+    #def addHabit(self):
         #adding Habit from the Class Habit.py into the Database
-        pass
+        #pass
 
-    def viewHabits(self):
+    #def viewHabits(self):
         #showing all Habits which are created 
-        pass
+        #pass
 
 
-    def deleteHabit(self):
+    #def deleteHabit(self):
         #deleting Habit which is created from the User
-        pass
+        #pass
 
 

@@ -1,13 +1,17 @@
 
-
-
+# History hat Habits und ist nicht Habits deswegen compension
+# History is not itself like Habits. History has just Habits, but is not possible to be allone
+# because it depends of Habits and also Habits are depended of the User o
+# History hat auch User dementsprechen und 
+from habit import Habit
+from user import User
 
 
 class History:
     def __init__(self):
         self.historyID
-        self.userID
-        self.habitID
+        self.userID = User()
+        self.habitID = Habit()
         self.date
         self.statusHistory
         self.comment

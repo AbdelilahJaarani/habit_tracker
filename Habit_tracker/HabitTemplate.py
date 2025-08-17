@@ -1,4 +1,5 @@
 import random
+import calendar
 
 class HabitTemplate:
     def __init__(self):
@@ -7,7 +8,7 @@ class HabitTemplate:
         
     
     def listCatergory(self):
-        #list of category that the user can use
+
         habit_categories = [
             "Health & Fitness",
             "Nutrition",
@@ -25,12 +26,37 @@ class HabitTemplate:
     
     
     def listPeriodicity(self):
-        #list of periodicity that the user can use
-        periodicty = ["daily", "weekly", "monthly"]
+        
+    # Returns a list of possible periodicity options that the user can choose from when creating a habit.
+
+    # Available options:
+    # - "daily"   : daily recurrence
+    # - "weekly"  : weekly recurrence
+
+    # Stores the list internally in the attribute `self.periodicity` and returns it.
+
+    # Returns:
+    #     list: A list of strings representing the periodicity options.
+        
+        periodicty = ["daily", "weekly"]
         self.peridicity = periodicty
         return periodicty
+    
+    def getWeekdays(self):
+  
+    # Returns a list of weekday names in English.
 
-    def ListTemplates(self):
+    # Uses the Python `calendar` module to provide the correct and complete list of weekday names.
+
+    # Returns:
+    #     list: List of weekday names from Monday to Sunday 
+    #         (e.g., ['Monday', 'Tuesday', 'Wednesday', ...]).
+
+        return list(calendar.day_name)
+    
+
+
+    def listTemplates(self):
         #able to import other Habit and integrates into the system 
         habits = [
         {
@@ -126,12 +152,12 @@ class HabitTemplate:
         ]
         return habits
     
-    def TemplatesExamples(self):
+    def templatesExamples(self):
         #creating a example template for us if he needs an inspiration
-        rdHabit = self.ListTemplates()
+        rdHabit = self.listTemplates()
         newTemplate = {}
         oneDict = random.choice(rdHabit)
         newCategory = oneDict["category"]
         newHabit = random.choice(oneDict["habits"])
-        newTemplate[newCategory] = newHabit
-        return newTemplate
+        #newTemplate[newCategory] = newHabit
+        return {"category":newCategory, "habits":newHabit} # hier werden mit festen Schluesseln zurueckgegeben 
