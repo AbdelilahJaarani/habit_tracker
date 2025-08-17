@@ -32,8 +32,8 @@ def registrationAndLoginMenue():
     login = False
 
     while not (registration or login):
-        choice = input("Press [r] for registration || press [l] for login ")
-        if choice == "r":
+        choice = int(input("Press [1] for registration || press [2] for login "))
+        if choice == 1:
             os.system('cls')
             success , user_data = user.register()
             if success:
@@ -47,7 +47,7 @@ def registrationAndLoginMenue():
                 # Der eigentliche Start kommt jetzt 
 
 
-        elif choice == "l":
+        elif choice == 2:
                 os.system('cls')
                 success, user_data = user.login()
                 if  success == False:

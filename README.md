@@ -99,12 +99,12 @@ Follow on-screen prompts to register, login, and start managing your habits.
 
 ```
 HABIT TRACKER
-Press [r] for registration || press [l] for login
-> r
+Press [1] for registration || press [2] for login
+> 1
 
 Registration:
-Name: Alice
-Email: alice@example.com
+Name: AJ
+Email: aj@example.com
 Password: ********
 
 Registration was successful!
@@ -158,7 +158,7 @@ Habit was created:
 - Input validation and error handling need enhancement, especially for registration and habit creation.
 - Notification system and reminders are not implemented.
 - History tracking is scaffolded but not functional.
-- The app runs in the command line only; no graphical user interface available.
+- The app runs in the command line only // not really an issue. An GUI would be more complex. 
 
 ***
 
