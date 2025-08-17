@@ -158,7 +158,7 @@ Habit was created:
 - Input validation and error handling need enhancement, especially for registration and habit creation.
 - Notification system and reminders are not implemented.
 - History tracking is scaffolded but not functional.
-- The app runs in the command line only // not really an issue. An GUI would be more complex. 
+- The app runs in the command line only // not really an issue. A GUI would be more complex. 
 
 ***
 
