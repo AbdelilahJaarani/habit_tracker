@@ -11,23 +11,53 @@ class HabitTracker:
         self.trackerID = None
         self.createdHabit = None
 
+
+    def KeepGoingOrNot(self): 
+        while True:
+            ip =  int(input("Press number 0 to go back into the menue!\n"))
+            if ip == 0:
+                os.system('cls')
+                return True
+            else:
+                print('Wrong Input')
+
     def StartPLattform(self, UserID):
 
-        print(" Welcome")
         choice = True
         while choice: 
-            habitChoice = int(input(" Start with a new Habit!\n If you want to create your own Habit please press [1]\n \
-                                If you want to take a Template please press [2]\n Press [3] for back to user menue"))
+            print("Welcome")
+            habitChoice = int(input(
+                "Start with a new Habit!\n" +
+                "Press a Number!\n"+""
+                "{:<25} [{}]\n".format("Mark your Habit done",1) +
+                "{:<25} [{}]\n".format("Create your own Habit",2) +
+                "{:<25} [{}]\n".format("Take a Template Habit",3) +
+                "{:<25} [{}]\n".format("Show your Habit",4) +
+                "{:<25} [{}]\n".format("Edit a Habit",5) +
+                "{:<25} [{}]\n".format("Delete a Habit",6) +
+                "{:<25} [{}]\n".format("Back to user menue",0) +
+                "> "))
             if habitChoice == 1:
+                hb.markAsCompleted(user_data= UserID)
+            elif habitChoice == 2:
                 hb.add(user_data= UserID)
-            elif habitChoice == 2: 
+            elif habitChoice == 3: 
                 os.system('cls')
                 habitmplte = hb.addHabitTemplate(user_data= UserID)
                 if habitmplte == None:
                     pass #if the user press exit you will get here
                 else:
                     data.saveData_Habit(habitmplte) #The habits is saved into the Database
-            elif habitChoice == 3:
+            elif habitChoice == 4:
+                os.system('cls')
+                habitList = hb.showHabit(user=UserID)
+                print(habitList)
+                self.KeepGoingOrNot()
+            elif habitChoice == 5:
+                pass
+            elif habitChoice == 6:
+                pass
+            elif habitChoice == 0: 
                 return True #Unlogging 
             else:
                 os.system('cls')

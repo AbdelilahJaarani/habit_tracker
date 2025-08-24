@@ -1,4 +1,5 @@
 import sqlite3
+import pandas as pd
 import os
 
 class DataBase:
@@ -63,15 +64,51 @@ class DataBase:
     def deleteData_User (self, data):
         pass
     ########################### Habit Storage ########################################
-    
-        
-    def saveData_Habit(self, data):
-        #save Habit into DB  
+
+
+    def markComplete_Habit(self,data):
         cursor = self.cursor
         try:
             if data:
-                cursor.execute("INSERT INTO habits (user_id,name,category,description,periodicity,status,startDate)VALUES (?,?,?,?,?,?)"
-                               (data["name"], data["category"], data["description"], data["periodicity"], data["status"], data["status"],data["startDate"])
+                cursor.execute(
+                    "INSERT INTO habit_completion (habit_id,completion_date,status,)VALUES (?,?,?,)",
+                    (data["habit_id"],data["completion_date"],data["status"])
+                )
+                self.sqliteConnection.commit()
+                return True, data
+        except sqlite3.Error as e:
+            print(f"Integrity Error: {e}")
+            return False, None        
+        
+        pass
+
+    def check_if_habit_already_done(self,data):
+        cursor = self.cursor
+        try:
+            if data:
+                cursor.execute("SELECT habit_id, completion_date FROM habit_completion WHERE habit_id = ? AND completion_date = ?", (data["habit_id"], data["completion_date"]))
+                return cursor.fetchone() is not None
+                
+                user_data = cursor.fetchone()
+                if user_data is None:
+                    return False
+                else:
+                    return True
+        except sqlite3.IntegrityError as e:
+            print(f"Integrity Error: {e}")
+        except sqlite3.OperationalError as e:
+            print(f"Operational Error: {e}")
+        
+    
+        
+    def saveData_Habit(self, data):
+        #save Habit into DB 
+        cursor = self.cursor
+        try:
+            if data:
+                cursor.execute(
+                    "INSERT INTO habits (user_id,category,habit,description,periodicity,status,startDate)VALUES (?,?,?,?,?,?,?)",
+                    (data["user_id"],data["category"],data["habit"], data["description"], data["periodicity"], data["status"],data["startDate"])
                 )
                 self.sqliteConnection.commit()
                 return True, data
@@ -83,13 +120,11 @@ class DataBase:
     def loadData_Habit(self,data):
         cursor = self.cursor
         try:
-            if data["ID"] == "user":
-                cursor.execute("SELECT email, password FROM USER WHERE email = ? AND password = ?", (data["email"], data["password"]))
-                result = cursor.fetchone()
-                if result is None:
-                    return False
-                else:
-                    return True, data
+            if data:
+                df = pd.read_sql_query(f"SELECT habit_id,category,habit,description,periodicity,startDate FROM habits WHERE user_id = ?",self.sqliteConnection,params=(data["user_id"],))
+                df_to_dict = df.to_dict(orient="records")
+                
+                return df, df_to_dict
         except sqlite3.IntegrityError as e:
             print(f"Integrity Error: {e}")
         except sqlite3.OperationalError as e:
@@ -103,15 +138,30 @@ class DataBase:
             print(f"Integrity Error: {e}")
         except sqlite3.OperationalError as e:
             print(f"Operational Error: {e}")
-        
 
-    def restoreData_Habit(self):
+    def ShowOnlyHabits(self,data):
         try:
-            pass
+            if data:
+                df = pd.read_sql_query("SELECT habit AS 'Habits' FROM habits WHERE user_id = ?",
+                                       self.sqliteConnection,
+                                       params=(data["user_id"],))
+                maxlen = df["Habits"].astype(str).str.len().max()
+                formatters = {"Habits":lambda x: f"{x:<{maxlen}}"}
+                return df.to_string(formatters= formatters, justify= "center")
         except sqlite3.IntegrityError as e:
             print(f"Integrity Error: {e}")
         except sqlite3.OperationalError as e:
-            print(f"Operational Error: {e}")
+            print(f"Operational Error: {e}")        
+
+        
+    # Not necessary
+    # def restoreData_Habit(self):
+    #     try:
+    #         pass
+    #     except sqlite3.IntegrityError as e:
+    #         print(f"Integrity Error: {e}")
+    #     except sqlite3.OperationalError as e:
+    #         print(f"Operational Error: {e}")
     
     def deleteData_Habit(self, data):
         pass

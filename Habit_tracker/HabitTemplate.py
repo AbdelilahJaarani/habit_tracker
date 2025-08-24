@@ -155,9 +155,11 @@ class HabitTemplate:
     def templatesExamples(self):
         #creating a example template for us if he needs an inspiration
         rdHabit = self.listTemplates()
+        periods = self.listPeriodicity()
+        dailyperiod = periods[0]
         newTemplate = {}
         oneDict = random.choice(rdHabit)
         newCategory = oneDict["category"]
         newHabit = random.choice(oneDict["habits"])
         #newTemplate[newCategory] = newHabit
-        return {"category":newCategory, "habits":newHabit} # hier werden mit festen Schluesseln zurueckgegeben 
+        return {"category":newCategory, "habits":newHabit, "intervall":dailyperiod } # hier werden mit festen Schluesseln zurueckgegeben 
