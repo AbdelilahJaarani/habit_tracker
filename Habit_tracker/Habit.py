@@ -112,6 +112,7 @@ class Habit:
         pass
 
     def markAsCompleted(self,user_data):
+        markedHabit = {}
 
         def bold(text):
             return f"\033[1m{text}\033[0m"
@@ -120,13 +121,22 @@ class Habit:
         while True:
             _, habitDict = data.loadData_Habit(data=user_data)
             for dict in habitDict:
+                if data.check_if_habit_already_done(dict):
+                    continue
+                
                 mark = int(input("Did you complete today:\n"+
                             f"{bold(dict["habit"])}""\n"+
                             "{:<25} [{}]\n".format("Yes",1) +
                             "{:<25} [{}]\n".format("No",2)))
                 if mark == 1:
+                    # if data.check_if_habit_already_done(data=user_data):
+                    #     print("Habit is already marked as done today!")
+                    print("GOOD JOB!")
+                    markedHabit.update({dict["habit"]})
+                    data.markComplete_Habit(dict)
                     pass
                 elif mark ==2:
+                    print("DON'T GIVE UP!\nDo it or try it tomorrow")
                     pass
                 else: 
                     os.system('cls')
