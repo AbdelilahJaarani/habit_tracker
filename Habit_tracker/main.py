@@ -6,10 +6,20 @@ ht = HabitTracker()
 user = User()
 
 
-def UserSetting(user_dt,register,login):
-    while True: 
-        second_choice = int(input("Press [1] for starting the Habittracker\nPress [2] for Updating your account " \
-        "information\nPress [3] for deleting a User\n Press [4] for showing user information\nPress [0] for logging out"))
+def UserSetting(user_dt):
+    choice = True
+    while choice: 
+        print("Welcome")
+        second_choice = int(input(
+            "Start with a new Habit!\n" +
+            "Press a Number!\n"+""
+            "{:<25} [{}]\n".format("Starting the Habittracker",1) +
+            "{:<25} [{}]\n".format("Updating your account",2) +
+            "{:<25} [{}]\n".format("Deleting a User",3) +
+            "{:<25} [{}]\n".format("Showing user information",4) +
+            "{:<25} [{}]\n".format("Logging out",0) +
+            "> "))
+
         if second_choice == 1:
             return True
         elif second_choice == 2:
@@ -17,9 +27,8 @@ def UserSetting(user_dt,register,login):
         elif second_choice == 3:
             user.deleteUser()
         elif second_choice == 4:
-            user.showProfile()
-        elif second_choice == 0: 
-            if login:
+            print(user.showProfile(user_data=user_dt))
+        elif second_choice == 0:  
                 return False
             #Back to the first Page
         else:

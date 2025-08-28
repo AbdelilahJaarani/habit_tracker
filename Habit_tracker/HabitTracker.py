@@ -54,11 +54,11 @@ class HabitTracker:
                 print(habitList)
                 self.KeepGoingOrNot()
             elif habitChoice == 5:
-                pass
+                hb.editHabit(user_data= UserID)
             elif habitChoice == 6:
-                pass
+                hb.delete(user_data= UserID)
             elif habitChoice == 0: 
-                return True #Unlogging 
+                return True #Back to the user menue
             else:
                 os.system('cls')
                 print("Wrong Input!")

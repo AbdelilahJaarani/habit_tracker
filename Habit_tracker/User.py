@@ -2,6 +2,7 @@ from dataStorage import DataBase
 from habit import Habit
 import os
 import random
+import re
 Data = DataBase()
 #hb = habit()
 
@@ -16,24 +17,38 @@ class User:
         
 
     def register(self):
-        #creating a new User for using the HabitTracker and saving Data into Database
-        print("Registration:")
-        self.name = input("Name: ")
-        self.email = input("Email: ")
-        self.password = input("Password: ")
-        
-        self.userID = {"ID":"user" ,
-                       "name" : self.name,
-                       "email": self.email,
-                       "password": self.password}
 
-        completedRegistration , user_data = Data.saveData_User(data= self.userID)
-        if completedRegistration:
-            os.system('cls')
-            print("Registartion was sucessfull!")
-            return True, user_data
-        else:
-            return False, None     
+        def is_valid_email(email):
+            # Regular expression for validating an Email
+            regex = r'^[a-z0-9]+[._]?[a-z0-9]+[@]\w+[.]\w+$'
+            if re.match(regex, email):
+                return True
+            else:
+                return False
+            
+        #creating a new User for using the HabitTracker and saving Data into Database
+        while True:
+            print("Registration:")
+            self.name = input("Name: ")
+            self.email = input("Email: ")
+            if is_valid_email(email=self.email):   
+                self.password = input("Password: ")
+                
+                self.userID = {"ID":"user" ,
+                            "name" : self.name,
+                            "email": self.email,
+                            "password": self.password}
+
+                completedRegistration , user_data = Data.saveData_User(data= self.userID)
+                if completedRegistration:
+                    os.system('cls')
+                    print("Registartion was sucessfull!")
+                    return True, user_data
+                else:
+                    return False, None
+            else:
+                print(f"{self.email} is an invalid email")
+                continue    
     
     def login(self):
         #checked if User is already register
@@ -41,14 +56,15 @@ class User:
         self.email = input("Email: ")
         self.password = input("Password: ")
 
-        self.userID = {"ID": "user",
+        self.userID = {
                        "email": self.email,
-                       "password": self.password}    
+                       "password": self.password
+                       }    
         
         user_data = Data.loadData_User(data=self.userID)
 
         if not user_data:
-            return False
+            return False, None
         else: 
             os.system('cls')
             print("Login was sucessfully")
@@ -56,9 +72,10 @@ class User:
             return True, dt
 
 
-    def showProfile(self):
+    def showProfile(self,user_data):
+        profie,_ = Data.ShowOnlyUserInformation(user_data)
         #show all Informarion about the User 
-        return self.userID
+        return profie
 
     def updatePreferences(self, user_data):
         #Updating new Preferences or adding more {have more clear}
@@ -73,18 +90,5 @@ class User:
     
     def deleteUser(self):
         pass
-
-    #def addHabit(self):
-        #adding Habit from the Class Habit.py into the Database
-        #pass
-
-    #def viewHabits(self):
-        #showing all Habits which are created 
-        #pass
-
-
-    #def deleteHabit(self):
-        #deleting Habit which is created from the User
-        #pass
 
 

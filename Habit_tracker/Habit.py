@@ -11,6 +11,12 @@ check = True
 
 class Habit:
     def __init__(self):
+        #   """
+        # Initialize a new Habit object.
+
+        # Sets up all habit properties, pulling category, periodicity, and weekday options
+        # from the associated HabitTemplate. Also sets the habit creation date.
+        #     """
         self.habitID = None
         self.name = None
         self.category = ht.listCatergory()
@@ -21,7 +27,21 @@ class Habit:
         self.startDate = datetime.now().strftime("%Y-%m-%d")
 
     def choose_from_list(self,prompt,options):
-        #Helpfunction for secure selection form a list
+
+        # """
+        # Prompt the user to select an option from a provided list.
+
+        # Presents each option with an associated number. The user inputs the number
+        # corresponding to their choice; invalid inputs will trigger an error message
+        # and repeat the prompt. Returns the selected option as a string.
+
+        # Args:
+        #     prompt (str): Instruction or question for the user.
+        #     options (List[str]): List of options to choose from.
+
+        # Returns:
+        #     str: The option selected by the user.
+        # """
         
         while True:
             print(prompt)
@@ -37,7 +57,22 @@ class Habit:
                 print("Please give a number.\n")
 
     def add(self, user_data):
-        #creating a new Habit by the User
+
+        # """
+        # Create and save a new habit with user-provided data.
+
+        # Interactively collects all required information (category, name, description,
+        # periodicity, weekday if needed), builds a habit dictionary, and
+        # passes it to the database for saving.
+
+        # Args:
+        #     user_data (Any): User identifier or relevant user data (for DB entry).
+
+        # Side effects:
+        #     Prompts the user, clears the terminal, and may pause execution with time.sleep.
+        #     Calls the database interface to save a new habit.
+        # """
+
         NewHabit = {}
         os.system('cls')
         print("== New Habit ==")
@@ -62,7 +97,6 @@ class Habit:
             NewHabit.update({"weekday": choosen_day})
         
         NewHabit.update({"status":self.status,"startDate":self.startDate})
-        # print(NewHabit)
         os.system('cls')
         print("Habit is saving...:\n")
         #Saving into the Database 
@@ -73,7 +107,21 @@ class Habit:
 
 
     def addHabitTemplate(self, user_data):
-        #creating a new habit from the Templates and save it into the Db
+
+        # """
+        # Add a new habit using a template chosen or confirmed by the user.
+
+        # Continuously displays template details and prompts the user to accept,
+        # skip, or exit. If accepted, the method saves the template as a new habit 
+        # in the database.
+
+        # Args:
+        #     user_data (Any): User identifier for DB record.
+
+        # Side effects:
+        #     Updates the database, clears the terminal, and prints messages.
+        # """
+
         TemplateHabit = {}
         while check: 
             print(f"Here an daily Habit example:\nCategory: {ht.templatesExamples()["category"]} \nHabit: {ht.templatesExamples()["habits"]}\nIntervall: {ht.templatesExamples()["intervall"]}")
@@ -107,60 +155,225 @@ class Habit:
                 os.system('cls')
         
 
-    def delete(self):
-        #deleting habit which is used by the user 
-        pass
-
     def markAsCompleted(self,user_data):
+
+        # """
+        # Mark one or more habits as done or not-done for today.
+
+        # For all habits not yet completed today: shows their name, asks if they
+        # were completed, and updates the completion status in the database (1 for done,
+        # 0 for not done).
+
+        # Args:
+        #     user_data (Any): User's unique identifier.
+
+        # Side effects:
+        #     Updates the database and repeatedly prompts user for input.
+        # """
+
         markedHabit = {}
 
         def bold(text):
             return f"\033[1m{text}\033[0m"
         
-        #mark the habit as Done if user already has done it. 
         while True:
             _, habitDict = data.loadData_Habit(data=user_data)
-            for dict in habitDict:
-                if data.check_if_habit_already_done(dict):
-                    continue
+            if user_data:
+                for dict in habitDict:
+                    if data.check_if_habit_already_done(dict):
+                        continue
+                    try:
+                        mark = int(input("Did you complete today:\n"+
+                                    f"{bold(dict["habit"])}""\n"+
+                                    "{:<25} [{}]\n".format("Yes",1) +
+                                    "{:<25} [{}]\n".format("No",2)))
+                        if mark == 1:
+                            # if data.check_if_habit_already_done(data=user_data):
+                            #     print("Habit is already marked as done today!")
+                            print("GOOD JOB!")
+                            markedHabit.update({"habit_id":dict["habit_id"],"completion_date":self.startDate,"status": 1})
+                            data.markComplete_Habit(markedHabit)
+                            
+                        elif mark ==2:
+                            print("DON'T GIVE UP!\nDo it or try it tomorrow")
+                            markedHabit.update({"habit_id":dict["habit_id"],"completion_date":self.startDate,"status": 0})
+                            data.markComplete_Habit(markedHabit)
+                        else: 
+                            os.system('cls')
+                            print("Wrong input!")
+                            time.sleep(1)
+                            os.system('cls')
+                    except ValueError:
+                        print("Only Numbers please!")
+                        continue
                 
-                mark = int(input("Did you complete today:\n"+
-                            f"{bold(dict["habit"])}""\n"+
-                            "{:<25} [{}]\n".format("Yes",1) +
-                            "{:<25} [{}]\n".format("No",2)))
-                if mark == 1:
-                    # if data.check_if_habit_already_done(data=user_data):
-                    #     print("Habit is already marked as done today!")
-                    print("GOOD JOB!")
-                    markedHabit.update({dict["habit"]})
-                    data.markComplete_Habit(dict)
-                    pass
-                elif mark ==2:
-                    print("DON'T GIVE UP!\nDo it or try it tomorrow")
-                    pass
-                else: 
-                    os.system('cls')
-                    print("Wrong input!")
-                    time.sleep(1)
-                    os.system('cls')
+                break
 
-        #print(bold(habitDict))
-        print(type(habitDict))
-        # print(data.ShowOnlyHabits(data=user_data))
-        # print(type(data.ShowOnlyHabits(data=user_data)))
 
     def showHabit(self,user):
-        #strUser = str(user)
+
+        # """
+        # Retrieve and return the string representation of all habits for a user.
+
+        # Args:
+        #     user (Any): Unique identification for which user habits to show.
+
+        # Returns:
+        #     str: String (or list) with the user’s habit data, formatted for display.
+        # """
+
         habitString,_ = data.loadData_Habit(user)
         return habitString
         
 
-    def editHabit(self):
-        #modify the Habit which is created from the user
-        pass
+    def editHabit(self,user_data):
+
+        # """
+        # Edit an existing habit (category, name, description or periodicity).
+
+        # Guides the user through selecting which habit and which field to change, then gets the new value and saves it.
+
+        # Args:
+        #     user_data (Any): User identifier or data to look up those habits.
+
+        # Side effects:
+        #     Updates one or more fields for the chosen habit in the database.
+        #     Prints messages and prompts user for new values.
+        # """
+
+        def updateInput(clm):
+            update = input("Write your change:\n" + clm + "\n" +
+                           ">")
+            os.system('cls')
+            return update
+
+        while True:
+            habitString,AllHabitsInList = data.loadData_Habit(user_data)
+
+            habitChoice = input("Which Habit do you want to change?\n"+
+                                "Write the habit ID Number please or [x] for exit :\n"+
+                                str(habitString)+"\n"+
+                                "\n"+">")
+            
+            if habitChoice == "x":
+                os.system('cls')
+                print("back to menue..")
+                time.sleep(2)
+                os.system('cls')
+                break
+                
+            try:
+                habit_id = int(habitChoice)
+            except ValueError:
+                print("Only Numbers or x for exit")
+                continue
+            
+            for dict in AllHabitsInList:
+                if habit_id == dict["habit_id"]:
+                    try:
+                        changeInfo = int(input(
+                                    "What do you want to change?\n" +
+                                    "{:<25} [{}]\n".format("Category",1) +      
+                                    "{:<25} [{}]\n".format("Habitname",2) +
+                                    "{:<25} [{}]\n".format("Description",3)+
+                                    "{:<25} [{}]\n".format("Periodicity",4)+
+                                    "{:<25} [{}]\n".format("Exit",0)))
+                        if changeInfo == 1:
+                            choosen_category = self.choose_from_list(prompt="Choose the new Category",options=self.category)
+                            data.UpdateData_Habit(data=dict,update=choosen_category,part="category")
+                        elif changeInfo == 2:
+                            change = updateInput(clm=dict["habit"])
+                            data.UpdateData_Habit(data=dict,update= change, part="habit")
+                        elif changeInfo == 3:
+                            change = updateInput(clm=dict["description"])
+                            data.UpdateData_Habit(data=dict,update= change, part="description")
+                        elif changeInfo == 4:
+                            choosen_interval = self.choose_from_list(prompt= "In which period do you want to change ",options= self.periodicity)
+                            if choosen_interval == "weekly":
+                                choosen_day = self.choose_from_list(prompt="Which Weekday should the habit be done?", options= self.weekdays)
+                                data.UpdateData_Habit(data=dict,update=choosen_interval,part="periodicity")
+                                data.UpdateData_Habit(data=dict,update=choosen_day,part="weekday")
+                            else:
+                                data.UpdateData_Habit(data=dict,update=choosen_interval,part="periodicity")
+                        elif changeInfo == 0:
+                            break
+                        else:
+                            os.system('cls')
+                            print("Wrong Input")
+                                  
+                    except ValueError:
+                        print("Only Numbers are allowed")
+                        break
+
+                
 
 
-# SetReminder not nessarry 
-    # def setReminder(self):
-    #     #add also an reminder which send a message to the User {LOOKING EXACTLY HOW JET}
-    #     pass
+    def delete(self,user_data):
+
+        # """
+        # Delete a habit for the user after user confirmation.
+
+        # Prompts the user to select which habit to delete, then asks for confirmation.
+        # If confirmed, deletes the habit from the database.
+
+        # Args:
+        #     user_data (Any): Identifier for which user's habits to work with.
+
+        # Side effects:
+        #     Removes the habit from persistent storage if confirmed.
+        #     Prompts the user and prints messages.
+        # """
+
+        while True:
+            habitString,AllHabitsInList = data.loadData_Habit(user_data)
+
+            habitChoice = input("Which Habit do you want to delete?\n"+
+                                "Write the habit ID Number please or [x] for exit :\n"+
+                                str(habitString)+"\n"+
+                                "\n"+">")
+            
+            if habitChoice == "x":
+                os.system('cls')
+                print("back to menue..")
+                time.sleep(2)
+                os.system('cls')
+                break
+            
+                
+            try:
+                habit_id = int(habitChoice)
+            except ValueError:
+                print("Only Numbers or x for exit")
+                os.system('cls')
+                continue
+            
+            for dict in AllHabitsInList:
+                if habit_id == dict["habit_id"]:
+                    try:
+                        os.system('cls')
+                        mark = int(input("Are you sure to delete :\n"+
+                        f"{(dict["habit"])}""\n"+
+                        "{:<25} [{}]\n".format("Yes",1) +
+                        "{:<25} [{}]\n".format("No",2)))
+
+                        if mark == 1:
+                            os.system('cls')
+                            print("Deleting...")
+                            time.sleep(2)
+                            if data.deleteData_Habit(data=dict):
+                                os.system('cls')
+                                print("Habit deleted!")
+                                os.system('cls')
+                        elif mark == 2: 
+                            break
+                        else: 
+                            os.system('cls')
+                            print("Wrong input!")
+                            time.sleep(1)
+                            os.system('cls')
+                            break        
+                    except ValueError:
+                        print("Only Numbers are allowed")
+                        break
+        
+
