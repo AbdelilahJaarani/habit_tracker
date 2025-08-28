@@ -88,7 +88,10 @@ class User:
                 if not Data.UpdateData_User(data=self.userID): #Update into the DB
                     return False
     
-    def deleteUser(self):
+    def deleteUser(self, user_data):
+        _, HabitDict = Data.loadData_Habit(user_data)
+        if Data.deleteData_User(user_data= user_data,habit_data= HabitDict):
+            print("User and all Habit from user deleted! ")
         pass
 
 
