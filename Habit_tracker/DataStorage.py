@@ -11,14 +11,21 @@ class DataBase:
 
 
     def saveData_User(self, data):
-        #save data for 
+        """
+        Save a new user in the USER table and return the new user row.
+        """
         cursor = self.cursor
         try:
             if data:
-                cursor.execute(f"INSERT INTO USER (name,email,password) VALUES ('{data["name"]}', '{data ["email"]}', '{data["password"]}')")
+                cursor.execute(
+                    "INSERT INTO USER (name,email,password) VALUES (?, ?, ?)",
+                    (data["name"], data["email"], data["password"])
+                )
+                self.sqliteConnection.commit()
                 user_id = cursor.lastrowid
-                cursor.execute("SELECT * FROM USER WHERE UserID = ?",(user_id,))
+                cursor.execute("SELECT * FROM USER WHERE user_id = ?", (user_id,))
                 user_data = cursor.fetchone()
+                # user_id = {"user_id":user_data[0]}
                 return True, user_data
         except sqlite3.IntegrityError as e:
             os.system('cls')
@@ -29,24 +36,53 @@ class DataBase:
             return False, None
         
 
-    def loadData_User(self,data):
+    def loadData_User(self, data):
+        """
+        Authenticates a user by checking if the combination of email and password exists in the database.
+        
+        Args:
+            data (dict): Must contain 'email' and 'password' as keys. Example:
+                {'email': 'user@example.com', 'password': 'userpassword'}
+        
+        Returns:
+            tuple: (True, user_data) if user is found, otherwise (False, None).
+                user_data contains the (user_id, email, password) tuple from the USER table.
+        
+        Side Effects:
+            Prints error information if a database problem occurs.
+        """
         cursor = self.cursor
         try:
             if data:
-                cursor.execute("SELECT UserID, email, password FROM USER WHERE email = ? AND password = ?", (data["email"], data["password"]))
+                # Remove possible empty spaces for reliability
+                email = data["email"].strip()
+                password = data["password"].strip()
+
+                cursor.execute(
+                    "SELECT user_id, name, email, password FROM USER WHERE email = ? AND password = ?",
+                    (email, password)
+                )
                 user_data = cursor.fetchone()
+                user_id = {"user_id":user_data[0],"name": user_data[1], "email":user_data[2],"password":user_data[3]}
                 if user_data is None:
-                    return False
+                    return False, None
                 else:
-                    return True, user_data #Result will be the tuple of all things (UserID,email,password )
+                    return True, user_id
         except sqlite3.IntegrityError as e:
             print(f"Integrity Error: {e}")
+            return False, None
         except sqlite3.OperationalError as e:
             print(f"Operational Error: {e}")
+            return False, None
 
-    def UpdateData_User(self,data):
+
+    def UpdateData_User(self,data,part,update):
         cursor = self.cursor
         try:
+            if data:
+                cursor.execute(f"UPDATE USER SET {part} = ? WHERE user_id = ?",
+                               (update,data["user_id"]))
+                self.sqliteConnection.commit()
             pass
         except sqlite3.IntegrityError as e:
             print(f"Integrity Error: {e}")
