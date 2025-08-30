@@ -10,40 +10,45 @@ user = User()
           
 
 def registrationAndLoginMenue():
-    print("HABIT TRACKER")
     registration = False 
     login = False
 
     while not (registration or login):
-        choice = int(input("Press [1] for registration || press [2] for login "))
-        if choice == 1:
-            os.system('cls')
-            success , user_data = user.register()
-            if success:
+        try:
+            choice = int(input("------- HABIT TRACKER -------\n" +
+                            "{:<25} [{}]\n".format("Registration",1) +      
+                            "{:<25} [{}]\n".format("Login",2)+"> "))
+            if choice == 1:
                 os.system('cls')
-                print(f"Welcome {user_data[1]} !") #the returned tuple (UserId, Name, Email, Password)
-                time.sleep(2)
-                os.system('cls')
-                if user.UserSetting(user_dt=user_data):
-                    registration = True
-                    return registration, user_data
-                
-                # Der eigentliche Start kommt jetzt 
+                success , user_data = user.register()
+                if success:
+                    os.system('cls')
+                    print(f"Welcome {user_data[1]} !") #the returned tuple (UserId, Name, Email, Password)
+                    time.sleep(2)
+                    os.system('cls')
+                    if user.UserSetting(user_dt=user_data):
+                        registration = True
+                        return registration, user_data
 
-
-        elif choice == 2:
+            elif choice == 2:
+                    os.system('cls')
+                    success, user_data = user.login()
+                    if  success == False:
+                        print("Email or Password are wrong please try again")
+                        os.system('cls')
+                    elif user.UserSetting(user_dt=user_data): 
+                        login = True
+                        return login, user_data
+                    # Der eigentliche Start kommt jetzt 
+            else:
                 os.system('cls')
-                success, user_data = user.login()
-                if  success == False:
-                    print("Email or Password are wrong please try again")
-                    #os.system('cls')
-                elif user.UserSetting(user_dt=user_data): 
-                    login = True
-                    return login, user_data
-                # Der eigentliche Start kommt jetzt 
-        else:
+                print("OOps wrong Input please try again! ")
+        
+        except ValueError:
             os.system('cls')
-            print("OOps wrong Input please try again! ")
+            print("Only Numbers are allowed !")
+            time.sleep(2)
+            os.system('cls')
 
 def main():
     stayOnMenue = True

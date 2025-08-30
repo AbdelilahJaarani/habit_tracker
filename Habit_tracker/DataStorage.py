@@ -5,7 +5,8 @@ from datetime import datetime
 
 class DataBase:
     def __init__(self):
-        self.sqliteConnection = sqlite3.connect(r"C:\Users\abdel\Documents\Habit_Tracker.db")
+        DBPATH = r"C:\Users\abdel\Documents\Habit_Tracker\habit_tracker\Habit_Tracker.db"
+        self.sqliteConnection = sqlite3.connect(DBPATH)
         self.cursor = self.sqliteConnection.cursor()
         self.dayToday = datetime.now().strftime("%Y-%m-%d")
 
@@ -25,8 +26,8 @@ class DataBase:
                 user_id = cursor.lastrowid
                 cursor.execute("SELECT * FROM USER WHERE user_id = ?", (user_id,))
                 user_data = cursor.fetchone()
-                # user_id = {"user_id":user_data[0]}
-                return True, user_data
+                user_id = {"user_id":user_data[0],"name": user_data[1], "email":user_data[2],"password":user_data[3]}
+                return True, user_id
         except sqlite3.IntegrityError as e:
             os.system('cls')
             print(f"The email '{data['email']}' is already used. Please use another one")
@@ -63,10 +64,10 @@ class DataBase:
                     (email, password)
                 )
                 user_data = cursor.fetchone()
-                user_id = {"user_id":user_data[0],"name": user_data[1], "email":user_data[2],"password":user_data[3]}
                 if user_data is None:
                     return False, None
                 else:
+                    user_id = {"user_id":user_data[0],"name": user_data[1], "email":user_data[2],"password":user_data[3]}
                     return True, user_id
         except sqlite3.IntegrityError as e:
             print(f"Integrity Error: {e}")
@@ -83,7 +84,7 @@ class DataBase:
                 cursor.execute(f"UPDATE USER SET {part} = ? WHERE user_id = ?",
                                (update,data["user_id"]))
                 self.sqliteConnection.commit()
-            pass
+            return True
         except sqlite3.IntegrityError as e:
             print(f"Integrity Error: {e}")
         except sqlite3.OperationalError as e:
