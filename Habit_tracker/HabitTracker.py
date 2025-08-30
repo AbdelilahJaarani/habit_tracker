@@ -9,12 +9,32 @@ HABIT = Habit()
 ANALYTICS = Analytics()
 
 class HabitTracker:
+    """
+    Command-line interface controller for the habit tracker.
+
+    This class presents a text menu, dispatches actions to the Habit and Analytics
+    services, and coordinates simple navigation like clearing the screen and returning
+    to the user menu. It does not contain business logic; it orchestrates calls to
+    domain services and persistence. 
+
+    Attributes:
+        trackerID (str | None): Optional identifier for the tracker session or context. 
+        createdHabit (dict | object | None): Reference to a recently created habit, if any. 
+    """
     def __init__(self):
         self.trackerID = None
         self.createdHabit = None
 
 
-    def keep_going_or_not(self): 
+    def keep_going_or_not(self):
+
+        """
+        Block until the user chooses to return to the menu.
+
+        Prompts for 0, clears the console on success, and signals the caller to resume.
+        Returns:
+            bool: True once the user entered 0 and the screen was cleared.
+        """
         while True:
             ip =  int(input("Press number 0 to go back into the menue!\n"))
             if ip == 0:
@@ -25,6 +45,17 @@ class HabitTracker:
 
 
     def start_plattform(self, UserID):
+        
+        """
+        Run the main habit menu loop for the given user.
+
+        Presents actions (mark done, create/edit/delete, templates, list, analytics),
+        dispatches to domain services, and exits back to the user menu on 0.
+        Args:
+            UserID (str | int): Identifier of the authenticated user.
+        Returns:
+            bool: True when exiting to the higher-level user menu.
+        """
 
         choice = True
         while choice: 

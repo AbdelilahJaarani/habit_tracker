@@ -7,7 +7,9 @@ import time
 DATABASE = DataBase()
 
 
-class User: 
+class User:
+    """Manage user authentication, profile display, updates, and deletion."""
+
     def __init__(self):
         self.userID = None
         self.name = None
@@ -16,6 +18,14 @@ class User:
         self.preference = None
 
     def user_setting(self,user_dt):
+        """
+        Run the user menu loop (start tracker, update, show, delete, logout).
+
+        Args:
+            user_dt (dict): The authenticated user's data dict.
+        Returns:
+            bool: True to enter tracker; False to log out or after deletion.
+        """
         choice = True
         while choice: 
             print("Welcome")
@@ -53,7 +63,14 @@ class User:
                 print("Wrong input please write the correct number!")
 
     def is_valid_email(self,email):
-        # Regular expression for validating an Email
+        """
+        Return whether an email matches a simple validation regex.
+
+        Args:
+            email (str): Email address to validate.
+        Returns:
+            bool: True if the email matches the pattern; otherwise False.
+        """
         regex = r'^[a-z0-9]+[._]?[a-z0-9]+[@]\w+[.]\w+$'
         if re.match(regex, email):
             return True
@@ -62,7 +79,13 @@ class User:
         
 
     def register(self):     
-        #creating a new User for using the HabitTracker and saving Data into Database
+        """
+        Interactively register a new user and persist to the database.
+
+        Prompts for name, email, and password; validates email; saves to storage.
+        Returns:
+            tuple[bool, dict | None]: (success flag, stored user data or None).
+        """
         while True:
             print("Registration:")
             self.name = input("Name: ")
@@ -87,7 +110,13 @@ class User:
                 continue    
     
     def login(self):
-        #checked if User is already register
+        """
+        Interactively authenticate a user by email and password.
+
+        Looks up credentials in storage and returns user data on success.
+        Returns:
+            tuple[bool, dict | None]: (success flag, user data or None).
+        """
         while True:
             print("Login")
             self.email = input("Email: ")
@@ -122,11 +151,24 @@ class User:
 
 
     def show_profile(self,user_data):
+        """
+        Return the profile information for the given user.
+
+        Args:
+            user_data (dict): The user's data dict.
+        Returns:
+            dict: Profile data as returned by the database layer.
+        """
         profie,_ = DATABASE.show_only_user_information(user_data)
-        #show all Informarion about the User 
         return profie
 
     def update_preferences(self, user_data):
+        """
+        Interactively update name, email, or password for the user.
+
+        Args:
+            user_data (dict): The user's current data dict (mutated in place).
+        """
         
         def update_input(clm):
             update = input("Write your change:\n" + "Current: "+ str(clm) + "\n" +
@@ -171,6 +213,14 @@ class User:
 
 
     def delete_user(self, user_data):
+        """
+        Delete the user and all associated habits from storage.
+
+        Args:
+            user_data (dict): The user's data dict.
+        Returns:
+            bool: True if deletion succeeded; otherwise False.
+        """
         habit_id_list = DATABASE.get_all_Habit_id(user_data)
         if DATABASE.delete_data_user(user_data= user_data,habit_data= habit_id_list):
             print("User and all Habit from user deleted! ")

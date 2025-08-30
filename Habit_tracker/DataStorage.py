@@ -4,7 +4,10 @@ import os
 from datetime import datetime
 
 class DataBase:
+    """Lightweight SQLite wrapper for user and habit persistence."""
+
     def __init__(self):
+        """Open a SQLite connection and prepare helpers (cursor, today date)."""
         DBPATH = r"C:\Users\abdel\Documents\Habit_Tracker\habit_tracker\Habit_Tracker.db"
         self.sqliteConnection = sqlite3.connect(DBPATH)
         self.cursor = self.sqliteConnection.cursor()
@@ -13,8 +16,13 @@ class DataBase:
 
     def save_data_user(self, data):
         """
-        Save a new user in the USER table and return the new user row.
-        """
+        Create a new user row and return the stored record.
+
+        Args:
+            data (dict): Keys 'name', 'email', 'password'.
+        Returns:
+            tuple[bool, dict | None]: (True, user_dict) on success; else (False, None).
+        """    
         cursor = self.cursor
         try:
             if data:
@@ -78,6 +86,16 @@ class DataBase:
 
 
     def update_data_user(self,data,part,update):
+        """
+        Update a single user field and commit.
+
+        Args:
+            data (dict): Must contain 'user_id'.
+            part (str): Column name to update.
+            update (Any): New value for the column.
+        Returns:
+            bool: True if update executed (exceptions print errors).
+        """
         cursor = self.cursor
         try:
             if data:
@@ -91,6 +109,14 @@ class DataBase:
             print(f"Operational Error: {e}")
 
     def show_only_user_information(self,data):
+        """
+        Return basic profile info for a user as DataFrame and dict.
+
+        Args:
+            data (dict): Must contain 'user_id'.
+        Returns:
+            tuple[pd.DataFrame, list[dict]]: (df, records) with user_id, name, email.
+        """
         try:
             if data:
                 df = pd.read_sql_query(f"SELECT user_id,name,email FROM USER WHERE user_id = ?",self.sqliteConnection,params=(data["user_id"],))
@@ -103,6 +129,15 @@ class DataBase:
         
 
     def delete_data_user (self, user_data, habit_data):
+        """
+        Delete a user and their related habit records.
+
+        Args:
+            user_data (dict): Must contain 'user_id'.
+            habit_data (list[int]): Habit IDs owned by the user.
+        Returns:
+            bool: True if user row was deleted and committed.
+        """
         cursor = self.cursor        
         if self.delete_all_habits_after_user_deleted(data=user_data,habitData=habit_data):
             try:
@@ -126,25 +161,14 @@ class DataBase:
 
 
     def mark_complete_habit(self,data):
+        """
+        Insert a habit completion record for a given date and status.
 
-        # """
-        # Insert a new completion record for a habit on a given date with completion status.
-
-        # Args:
-        #     data (dict): A dictionary with keys:
-        #         - 'habit_id': int, the unique ID of the habit completed
-        #         - 'completion_date': str, the date the habit was completed (format 'YYYY-MM-DD')
-        #         - 'status': int, completion status (typically 1 for done, 0 for not done)
-
-        # Returns:
-        #     tuple: (True, data) if insertion succeeded and was committed,
-        #         (False, None) if there was a database error.
-
-        # Side Effects:
-        #     Writes a new record into the 'habit_completion' table and commits the change.
-        #     Prints error messages if the operation fails.
-        # """
-
+        Args:
+            data (dict): {'habit_id': int, 'completion_date': 'YYYY-MM-DD', 'status': int}.
+        Returns:
+            tuple[bool, dict | None]: (True, data) on success; else (False, None).
+        """
         cursor = self.cursor
         try:
             if data:
@@ -161,22 +185,14 @@ class DataBase:
         pass
 
     def check_if_habit_already_done(self,data):
+        """
+        Return True if the habit is already completed today (status=1).
 
-        # """
-        # Check if a habit has already been marked as completed for today.
-
-        # Args:
-        #     data (dict): A dictionary with at least 'habit_id'.
-        #         Assumes self.dayToday provides the current date as a string.
-
-        # Returns:
-        #     bool: True if the habit is already completed for today and status=1, False otherwise.
-
-        # Side Effects:
-        #     Queries the 'habit_completion' table.
-        #     Prints errors if the query fails.
-        # """
-
+        Args:
+            data (dict): Must contain 'habit_id'.
+        Returns:
+            bool: True if a completion exists for today; otherwise False.
+        """
         cursor = self.cursor
         try:
             if data:
@@ -193,7 +209,14 @@ class DataBase:
             print(f"Operational Error: {e}")
         
     def check_any_habit_in_db(self,data):
+        """
+        Return whether the user has at least one habit in storage.
 
+        Args:
+            data (dict): Must contain 'user_id'.
+        Returns:
+            bool: True if a habit row exists; otherwise False.
+        """
         cursor = self.cursor
         try:
             if data:
@@ -212,23 +235,14 @@ class DataBase:
 
         
     def save_data_Habit(self, data):
+        """
+        Insert a new habit for the user.
 
-        # """
-        # Save a new habit record to the 'habits' table in the database.
-
-        # Args:
-        #     data (dict): Dictionary containing all fields required for a new habit:
-        #         - 'user_id', 'category', 'habit', 'description', 'periodicity', 
-        #         'status', 'startDate', 'weekday'
-
-        # Returns:
-        #     tuple: (True, data) if successful, (False, None) on failure.
-
-        # Side Effects:
-        #     Inserts a new row into 'habits' and commits.
-        #     Prints database error messages.
-        # """
-
+        Args:
+            data (dict): Keys 'user_id','category','habit','description','periodicity','status','startDate','weekday'.
+        Returns:
+            tuple[bool, dict | None]: (True, data) on success; else (False, None).
+        """
         cursor = self.cursor
         try:
             if data:
@@ -244,22 +258,14 @@ class DataBase:
         
 
     def load_data_Habit(self,data):
+        """
+        Load all habits for a user as DataFrame and dict records.
 
-        #     """
-        # Load all habit records for a specific user from the database.
-
-        # Args:
-        #     data (dict): Must contain 'user_id' (the user's identifier)
-
-        # Returns:
-        #     tuple: (DataFrame, List[dict]) — the habits as a pandas DataFrame and as a list of dictionaries.
-        #     Returns None if an error occurs.
-
-        # Side Effects:
-        #     Reads from the 'habits' table.
-        #     Prints errors if query fails.
-        #     """
-
+        Args:
+            data (dict): Must contain 'user_id'.
+        Returns:
+            tuple[pd.DataFrame, list[dict]]: (df, records) with habit fields.
+        """
         cursor = self.cursor
         try:
             if data:
@@ -272,6 +278,14 @@ class DataBase:
             print(f"Operational Error: {e}")
     
     def get_all_Habit_id(self,data):
+        """
+        Return a list of all habit IDs.
+
+        Args:
+            data (dict): Unused; kept for interface consistency.
+        Returns:
+            list[int]: Habit IDs across all users.
+        """
         cursor = self.cursor
         try:
             if data:
@@ -287,23 +301,14 @@ class DataBase:
         
 
     def update_data_habit(self,data,update,part):
+        """
+        Update a single habit field and commit.
 
-        # """
-        # Update a specific field of a habit in the database.
-
-        # Args:
-        #     data (dict): Dictionary with at least 'habit_id' key (target habit).
-        #     update (Any): The new value to set.
-        #     part (str): The column name to update (must be sanitized before use!).
-
-        # Returns:
-        #     None
-
-        # Side Effects:
-        #     Updates a field in the 'habits' table, commits the change.
-        #     Prints an error if something goes wrong.
-        # """
-            
+        Args:
+            data (dict): Must contain 'habit_id'.
+            update (Any): New value to set.
+            part (str): Column name to update.
+        """
         cursor = self.cursor        
         try:
             if data:
@@ -317,21 +322,14 @@ class DataBase:
             print(f"Operational Error: {e}")
 
     def show_only_habits(self,data):
+        """
+        Return a left-aligned table string of habit names for the user.
 
-        #"""
-        # Return a formatted string of all habit names for the given user.
-
-        # Args:
-        #     data (dict): Must contain 'user_id'.
-
-        # Returns:
-        #     str: Table of user habits, each left-aligned to the longest habit name.
-        #     None if an error occurs.
-
-        # Side Effects:
-        #     Reads from the database, prints errors on failure.
-        # """
-            
+        Args:
+            data (dict): Must contain 'user_id'.
+        Returns:
+            str: Formatted table of habit names.
+        """
         try:
             if data:
                 df = pd.read_sql_query("SELECT habit AS 'Habits' FROM habits WHERE user_id = ?",
@@ -347,22 +345,13 @@ class DataBase:
 
     
     def delete_data_habit(self, data):
-        #     """
-        # Delete a habit from the database based on habit_id.
+        """
+        Delete a habit row by its id.
 
-        # Args:
-        #     data (dict): Must contain 'habit_id' (unique identifier for the habit).
-
-        # Returns:
-        #     None
-
-        # Side Effects:
-        #     Removes the matching habit from the 'habits' table.
-        #     Commits the change.
-        #     Prints errors if the operation fails.
-        # """
-
-        cursor = self.cursor        
+        Args:
+            data (dict): Must contain 'habit_id'.
+        """
+        cursor = self.cursor 
         try:
             if data:
                 cursor.execute("DELETE from habits WHERE habit_id = ?",
@@ -377,6 +366,20 @@ class DataBase:
         
         
     def delete_all_habits_after_user_deleted(self,data,habitData):
+        """
+    Delete all habit data for a user after the user record is removed.
+
+    Deletes completions for each habit_id in habitData, then deletes the
+    user's habits, and commits the transaction.
+    Args:
+        data (dict): User dict containing 'user_id'.
+        habitData (list[int] | list[str]): Habit IDs associated with the user.
+    Returns:
+        bool: True if deletion and commit succeeded; otherwise None.
+    Raises:
+        sqlite3.IntegrityError: If a foreign key or integrity constraint fails.
+        sqlite3.OperationalError: For SQL execution or database operation issues.
+    """
         cursor = self.cursor        
         try:
             if data:
@@ -395,6 +398,16 @@ class DataBase:
             print(f"Operational Error: {e}")
         
     def _get_completion_dates(self, habit_id):
+        """
+    Return ordered completion dates (as datetime) for a given habit.
+
+    Fetches status=1 completions for habit_id and converts them from
+    'YYYY-MM-DD' strings to datetime objects, sorted ascending.
+    Args:
+        habit_id (int | str): The habit identifier.
+    Returns:
+        list[datetime]: Completion dates ordered by completion_date.
+    """
         cursor = self.cursor
         cursor.execute(
             "SELECT completion_date FROM habit_completion WHERE habit_id = ? AND status = 1 ORDER BY completion_date",

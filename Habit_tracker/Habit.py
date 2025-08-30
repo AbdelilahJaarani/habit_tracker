@@ -10,13 +10,10 @@ CHECK = True
 
 
 class Habit:
-    def __init__(self):
-        #   """
-        # Initialize a new Habit object.
+    """Interactively create, list, edit, complete, and delete habits for a user."""
 
-        # Sets up all habit properties, pulling category, periodicity, and weekday options
-        # from the associated HabitTemplate. Also sets the habit creation date.
-        #     """
+    def __init__(self):
+        """Initialize habit properties and fetch template options (categories, periodicity, weekdays)."""
         self.habit_id = None
         self.name = None
         self.category = HABIT_TEMPLATE.list_catergory()
@@ -27,22 +24,15 @@ class Habit:
         self.startDate = datetime.now().strftime("%Y-%m-%d")
 
     def choose_from_list(self,prompt,options):
+        """
+        Prompt for a selection from numbered options and return the chosen value.
 
-        # """
-        # Prompt the user to select an option from a provided list.
-
-        # Presents each option with an associated number. The user inputs the number
-        # corresponding to their choice; invalid inputs will trigger an error message
-        # and repeat the prompt. Returns the selected option as a string.
-
-        # Args:
-        #     prompt (str): Instruction or question for the user.
-        #     options (List[str]): List of options to choose from.
-
-        # Returns:
-        #     str: The option selected by the user.
-        # """
-        
+        Args:
+            prompt (str): Instructional message to display.
+            options (list[str]): Options to choose from.
+        Returns:
+            str: The selected option string.
+        """
         while True:
             print(prompt)
             for i, option in enumerate(options,1):
@@ -57,22 +47,12 @@ class Habit:
                 print("Please give a number.\n")
 
     def add(self, user_data):
+        """
+        Collect inputs to create a new habit and persist it. 
 
-        # """
-        # Create and save a new habit with user-provided data.
-
-        # Interactively collects all required information (category, name, description,
-        # periodicity, weekday if needed), builds a habit dictionary, and
-        # passes it to the database for saving.
-
-        # Args:
-        #     user_data (Any): User identifier or relevant user data (for DB entry).
-
-        # Side effects:
-        #     Prompts the user, clears the terminal, and may pause execution with time.sleep.
-        #     Calls the database interface to save a new habit.
-        # """
-
+        Args:
+            user_data (dict): Must contain 'user_id'. 
+        """
         NewHabit = {}
         os.system('cls')
         print("== New Habit ==")
@@ -109,21 +89,14 @@ class Habit:
 
 
     def add_habit_template(self, user_data):
+        """
+        Offer random templates until accepted; save accepted template as a new habit. 
 
-        # """
-        # Add a new habit using a template chosen or confirmed by the user.
-
-        # Continuously displays template details and prompts the user to accept,
-        # skip, or exit. If accepted, the method saves the template as a new habit 
-        # in the database.
-
-        # Args:
-        #     user_data (Any): User identifier for DB record.
-
-        # Side effects:
-        #     Updates the database, clears the terminal, and prints messages.
-        # """
-
+        Args:
+            user_data (dict): Must contain 'user_id'. 
+        Returns:
+            dict | None: Saved template data on success, or None if exited.
+        """
         TemplateHabit = {}
         while CHECK: 
             print(f"Here an daily Habit example:\nCategory: {HABIT_TEMPLATE.template_examples()["category"]} \nHabit: {HABIT_TEMPLATE.template_examples()["habits"]}\nIntervall: {HABIT_TEMPLATE.template_examples()["intervall"]}")
@@ -159,21 +132,12 @@ class Habit:
         
 
     def mark_as_completed(self,user_data):
+        """
+        For each habit not yet completed today, ask done/not done and record it.
 
-        # """
-        # Mark one or more habits as done or not-done for today.
-
-        # For all habits not yet completed today: shows their name, asks if they
-        # were completed, and updates the completion status in the database (1 for done,
-        # 0 for not done).
-
-        # Args:
-        #     user_data (Any): User's unique identifier.
-
-        # Side effects:
-        #     Updates the database and repeatedly prompts user for input.
-        # """
-
+        Args:
+            user_data (dict): Must contain 'user_id'. 
+        """
         markedHabit = {}
 
         def bold(text):
@@ -219,36 +183,25 @@ class Habit:
 
 
     def show_habit(self,user):
+        """
+        Return a printable table string of the user's habits.
 
-        # """
-        # Retrieve and return the string representation of all habits for a user.
-
-        # Args:
-        #     user (Any): Unique identification for which user habits to show.
-
-        # Returns:
-        #     str: String (or list) with the user’s habit data, formatted for display.
-        # """
-
+        Args:
+            user (dict): Must contain 'user_id'.
+        Returns:
+            str: Table string from the database query.
+        """
         habit_str,_ = DATABASE.load_data_Habit(user)
         return habit_str
         
 
     def edit_habit(self,user_data):
+        """
+        Interactively update a habit's category, name, description, or periodicity.
 
-        # """
-        # Edit an existing habit (category, name, description or periodicity).
-
-        # Guides the user through selecting which habit and which field to change, then gets the new value and saves it.
-
-        # Args:
-        #     user_data (Any): User identifier or data to look up those habits.
-
-        # Side effects:
-        #     Updates one or more fields for the chosen habit in the database.
-        #     Prints messages and prompts user for new values.
-        # """
-
+        Args:
+            user_data (dict): Must contain 'user_id'.
+        """
         def update_input(clm):
             update = input("Write your change:\n" + clm + "\n" +
                            ">")
@@ -317,21 +270,12 @@ class Habit:
 
 
     def delete(self,user_data):
+        """
+        Prompt for a habit id, confirm, and delete the habit if confirmed.
 
-        # """
-        # Delete a habit for the user after user confirmation.
-
-        # Prompts the user to select which habit to delete, then asks for confirmation.
-        # If confirmed, deletes the habit from the database.
-
-        # Args:
-        #     user_data (Any): Identifier for which user's habits to work with.
-
-        # Side effects:
-        #     Removes the habit from persistent storage if confirmed.
-        #     Prompts the user and prints messages.
-        # """
-
+        Args:
+            user_data (dict): Must contain 'user_id'.
+        """
         while True:
             habit_str,all_habits_in_list = DATABASE.load_data_Habit(user_data)
 

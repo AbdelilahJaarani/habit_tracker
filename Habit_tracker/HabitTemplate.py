@@ -8,6 +8,12 @@ class HabitTemplate:
         
     
     def list_catergory(self):
+        """
+        Return the list of predefined habit categories.
+
+        Returns:
+            list[str]: Human-readable category names.
+        """
 
         habit_categories = [
             "Health & Fitness",
@@ -153,7 +159,12 @@ class HabitTemplate:
         return habits
     
     def template_examples(self):
-        #creating a example template for us if he needs an inspiration
+        """
+        Return a single random example template with a default daily interval.
+
+        Returns:
+            dict: {'category': str, 'habits': str, 'intervall': 'daily'}.
+        """
         rdHabit = self.list_templates()
         periods = self.list_periodicity()
         dailyperiod = periods[0]

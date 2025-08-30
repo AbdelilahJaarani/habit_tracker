@@ -5,10 +5,19 @@ import time
 import os
 
 class Analytics:
+    """Query and compute habit analytics for a user."""
+    
     def __init__(self):
         self.db = DataBase()
 
     def analytics_menu(self, user_id):
+        """
+        Run the analytics CLI menu loop for the given user.
+
+        Shows lists by periodicity, longest streaks (all/specific), and navigation.
+        Args:
+            user_id (dict): Dict containing 'user_id' key for the active user.
+        """
         while True:
             os.system('cls')
 
@@ -71,15 +80,45 @@ class Analytics:
                 print("Invalid input, please try again. ")
 
     def get_all_habits(self, user_id):
+        """
+        Return all habit names for a user.
+        
+        Args:
+            user_id (str | int): The user's identifier.
+        Returns:
+            list[str]: Habit names belonging to the user.
+        """
         _, habits = self.db.load_data_Habit({"user_id": user_id})
         return list(map(lambda h: h['habit'], habits))
 
     def get_habits_by_periodicity(self, user_id, periodicity):
+        """
+        Return habit names filtered by periodicity.
+
+        Args:
+            user_id (str | int): The user's identifier.
+            periodicity (str): 'daily' or 'weekly'.
+        Returns:
+            list[str]: Habit names matching the periodicity.
+        """
         _, habits = self.db.load_data_Habit({"user_id": user_id})
         filtered = filter(lambda h: h['periodicity'] == periodicity, habits)
         return list(map(lambda h: h['habit'], filtered))
 
     def longest_streak_for_habit(self, habit_id, periodicity):
+        """
+        Compute the longest consecutive completion streak for one habit.
+
+        Adjacent completion dates must differ by one day for daily or one week for
+        weekly habits.
+        Args:
+            habit_id (str): Unique habit identifier.
+            periodicity (str): 'daily' or 'weekly'.
+        Returns:
+            int: Maximum number of consecutive periods completed.
+        Raises:
+            ValueError: If periodicity is not 'daily' or 'weekly'.
+        """
         dates = self.db._get_completion_dates(habit_id)
         if not dates:
             return 0
@@ -105,6 +144,14 @@ class Analytics:
         return max_streak
 
     def longest_streak_all_habits(self, user_id):
+        """
+        Compute the longest streak for each habit of a user.
+
+        Args:
+            user_id (str | int): The user's identifier.
+        Returns:
+            dict[str, int]: Mapping of habit name to longest streak length.
+        """
         _, habits = self.db.load_data_Habit({"user_id": user_id})
         streaks = {h['habit']: self.longest_streak_for_habit(h['habit_id'], h['periodicity']) for h in habits}
         return streaks

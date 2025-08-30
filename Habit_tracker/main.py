@@ -7,6 +7,15 @@ USER = User()
         
 
 def registration_and_login_menue():
+    """
+    Drive the initial menu to register or log in a user.
+
+    Interactively prompts for Registration or Login, performs the action,
+    and then opens the user settings menu. Returns when the user chooses
+    to enter the tracker or after a login/registration outcome.
+    Returns:
+        tuple[bool, dict | None]: (entered_tracker, user_data if available).
+    """
     registration = False 
     login = False
 
@@ -48,6 +57,12 @@ def registration_and_login_menue():
             os.system('cls')
 
 def main():
+    """
+    Application entry point for the Habit Tracker CLI.
+
+    Loops over registration/login, launches the tracker UI, and returns to
+    the user settings or login menu as requested.
+    """
     stay_on_menue = True
     
     while stay_on_menue:
