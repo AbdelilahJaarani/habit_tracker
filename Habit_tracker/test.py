@@ -12,7 +12,7 @@ from datetime import datetime
 
 #print ("What do you want to change ?\n [1] Name \n [2] Email \n [3] Password")
 data = {"user_id": 1}
-ht.StartPLattform(UserID=data)
+ht.start_plattform(UserID=data)
 
 # testData= {"name":"Abdelilah", "email": "abdelilah@gmail.com"}
 

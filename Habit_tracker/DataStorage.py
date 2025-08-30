@@ -8,10 +8,10 @@ class DataBase:
         DBPATH = r"C:\Users\abdel\Documents\Habit_Tracker\habit_tracker\Habit_Tracker.db"
         self.sqliteConnection = sqlite3.connect(DBPATH)
         self.cursor = self.sqliteConnection.cursor()
-        self.dayToday = datetime.now().strftime("%Y-%m-%d")
+        self.date_today = datetime.now().strftime("%Y-%m-%d")
 
 
-    def saveData_User(self, data):
+    def save_data_user(self, data):
         """
         Save a new user in the USER table and return the new user row.
         """
@@ -37,7 +37,7 @@ class DataBase:
             return False, None
         
 
-    def loadData_User(self, data):
+    def load_data_User(self, data):
         """
         Authenticates a user by checking if the combination of email and password exists in the database.
         
@@ -77,7 +77,7 @@ class DataBase:
             return False, None
 
 
-    def UpdateData_User(self,data,part,update):
+    def update_data_user(self,data,part,update):
         cursor = self.cursor
         try:
             if data:
@@ -90,7 +90,7 @@ class DataBase:
         except sqlite3.OperationalError as e:
             print(f"Operational Error: {e}")
 
-    def ShowOnlyUserInformation(self,data):
+    def show_only_user_information(self,data):
         try:
             if data:
                 df = pd.read_sql_query(f"SELECT user_id,name,email FROM USER WHERE user_id = ?",self.sqliteConnection,params=(data["user_id"],))
@@ -102,9 +102,9 @@ class DataBase:
             print(f"Operational Error: {e}")
         
 
-    def deleteData_User (self, user_data, habit_data):
+    def delete_data_user (self, user_data, habit_data):
         cursor = self.cursor        
-        if self.deleteAllHabitsAfterUserDeleted(data=user_data,habitData=habit_data):
+        if self.delete_all_habits_after_user_deleted(data=user_data,habitData=habit_data):
             try:
                 if user_data:
                     cursor.execute("DELETE from USER WHERE user_id = ?",
@@ -118,10 +118,14 @@ class DataBase:
             except sqlite3.OperationalError as e:
                 print(f"Operational Error: {e}")
             pass
-    ########################### Habit Storage ########################################
 
 
-    def markComplete_Habit(self,data):
+
+
+    ########################################################## Habit Storage #####################################################################
+
+
+    def mark_complete_habit(self,data):
 
         # """
         # Insert a new completion record for a habit on a given date with completion status.
@@ -177,7 +181,7 @@ class DataBase:
         try:
             if data:
                 cursor.execute(f"SELECT habit_id FROM habit_completion WHERE habit_id = ? AND completion_date = ? AND status = ?", 
-                               (data["habit_id"], self.dayToday,1))               
+                               (data["habit_id"], self.date_today,1))               
                 record = cursor.fetchone()
                 if record:
                     return True
@@ -188,9 +192,26 @@ class DataBase:
         except sqlite3.OperationalError as e:
             print(f"Operational Error: {e}")
         
-    
+    def check_any_habit_in_db(self,data):
+
+        cursor = self.cursor
+        try:
+            if data:
+                cursor.execute(f"SELECT user_id FROM habits WHERE user_id = ?", 
+                               ( data["user_id"],))               
+                record = cursor.fetchone()
+                if record:
+                    return True
+                else:
+                    return False
+        except sqlite3.IntegrityError as e:
+            print(f"Integrity Error: {e}")
+        except sqlite3.OperationalError as e:
+            print(f"Operational Error: {e}")
+
+
         
-    def saveData_Habit(self, data):
+    def save_data_Habit(self, data):
 
         # """
         # Save a new habit record to the 'habits' table in the database.
@@ -222,7 +243,7 @@ class DataBase:
             return False, None
         
 
-    def loadData_Habit(self,data):
+    def load_data_Habit(self,data):
 
         #     """
         # Load all habit records for a specific user from the database.
@@ -249,8 +270,23 @@ class DataBase:
             print(f"Integrity Error: {e}")
         except sqlite3.OperationalError as e:
             print(f"Operational Error: {e}")
+    
+    def get_all_Habit_id(self,data):
+        cursor = self.cursor
+        try:
+            if data:
+                cursor.execute(
+                    "SELECT habit_id FROM habits",    
+                )
+                habit_id_list = [row[0] for row in cursor.fetchall()]
+                return habit_id_list
+        except sqlite3.IntegrityError as e:
+            print(f"Integrity Error: {e}")
+        except sqlite3.OperationalError as e:
+            print(f"Operational Error: {e}")
+        
 
-    def UpdateData_Habit(self,data,update,part):
+    def update_data_habit(self,data,update,part):
 
         # """
         # Update a specific field of a habit in the database.
@@ -280,7 +316,7 @@ class DataBase:
         except sqlite3.OperationalError as e:
             print(f"Operational Error: {e}")
 
-    def ShowOnlyHabits(self,data):
+    def show_only_habits(self,data):
 
         #"""
         # Return a formatted string of all habit names for the given user.
@@ -310,7 +346,7 @@ class DataBase:
             print(f"Operational Error: {e}")        
 
     
-    def deleteData_Habit(self, data):
+    def delete_data_habit(self, data):
         #     """
         # Delete a habit from the database based on habit_id.
 
@@ -340,13 +376,14 @@ class DataBase:
             print(f"Operational Error: {e}")
         
         
-    def deleteAllHabitsAfterUserDeleted(self,data,habitData):
+    def delete_all_habits_after_user_deleted(self,data,habitData):
         cursor = self.cursor        
         try:
             if data:
-                cursor.execute("DELETE from habit_completion WHERE habit_id = ?",
-                            (habitData["habit_id"],)
-                            )
+                for habit_id in habitData:
+                    cursor.execute("DELETE from habit_completion WHERE habit_id = ?",
+                                (habit_id,)
+                                )
                 cursor.execute("DELETE from habits WHERE user_id = ?",
                             (data["user_id"],)
                             )
@@ -357,3 +394,11 @@ class DataBase:
         except sqlite3.OperationalError as e:
             print(f"Operational Error: {e}")
         
+    def _get_completion_dates(self, habit_id):
+        cursor = self.cursor
+        cursor.execute(
+            "SELECT completion_date FROM habit_completion WHERE habit_id = ? AND status = 1 ORDER BY completion_date",
+            (habit_id,))
+        dates = cursor.fetchall()
+        dates_dt = [datetime.strptime(d[0], "%Y-%m-%d") for d in dates]
+        return dates_dt

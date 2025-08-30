@@ -7,7 +7,7 @@ class HabitTemplate:
         self.peridicity = []
         
     
-    def listCatergory(self):
+    def list_catergory(self):
 
         habit_categories = [
             "Health & Fitness",
@@ -25,7 +25,7 @@ class HabitTemplate:
         return self.category
     
     
-    def listPeriodicity(self):
+    def list_periodicity(self):
         
     # Returns a list of possible periodicity options that the user can choose from when creating a habit.
 
@@ -42,7 +42,7 @@ class HabitTemplate:
         self.peridicity = periodicty
         return periodicty
     
-    def getWeekdays(self):
+    def get_weekdays(self):
   
     # Returns a list of weekday names in English.
 
@@ -56,7 +56,7 @@ class HabitTemplate:
     
 
 
-    def listTemplates(self):
+    def list_templates(self):
         #able to import other Habit and integrates into the system 
         habits = [
         {
@@ -152,14 +152,14 @@ class HabitTemplate:
         ]
         return habits
     
-    def templatesExamples(self):
+    def template_examples(self):
         #creating a example template for us if he needs an inspiration
-        rdHabit = self.listTemplates()
-        periods = self.listPeriodicity()
+        rdHabit = self.list_templates()
+        periods = self.list_periodicity()
         dailyperiod = periods[0]
         newTemplate = {}
         oneDict = random.choice(rdHabit)
         newCategory = oneDict["category"]
         newHabit = random.choice(oneDict["habits"])
         #newTemplate[newCategory] = newHabit
-        return {"category":newCategory, "habits":newHabit, "intervall":dailyperiod } # hier werden mit festen Schluesseln zurueckgegeben 
+        return {"category":newCategory, "habits":newHabit, "intervall":dailyperiod } 

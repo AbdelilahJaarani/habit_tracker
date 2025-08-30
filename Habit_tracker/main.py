@@ -2,14 +2,11 @@ import os
 import time
 from user import User
 from habitTracker import HabitTracker
-ht = HabitTracker()
-user = User()
+HABITTRACKER = HabitTracker()
+USER = User()
+        
 
-
-
-          
-
-def registrationAndLoginMenue():
+def registration_and_login_menue():
     registration = False 
     login = False
 
@@ -20,23 +17,23 @@ def registrationAndLoginMenue():
                             "{:<25} [{}]\n".format("Login",2)+"> "))
             if choice == 1:
                 os.system('cls')
-                success , user_data = user.register()
+                success , user_data = USER.register()
                 if success:
                     os.system('cls')
-                    print(f"Welcome {user_data[1]} !") #the returned tuple (UserId, Name, Email, Password)
+                    print(f"Welcome {user_data["name"]} !") #the returned tuple (UserId, Name, Email, Password)
                     time.sleep(2)
                     os.system('cls')
-                    if user.UserSetting(user_dt=user_data):
+                    if USER.user_setting(user_dt=user_data):
                         registration = True
                         return registration, user_data
 
             elif choice == 2:
                     os.system('cls')
-                    success, user_data = user.login()
+                    success, user_data = USER.login()
                     if  success == False:
                         print("Email or Password are wrong please try again")
                         os.system('cls')
-                    elif user.UserSetting(user_dt=user_data): 
+                    elif USER.user_setting(user_dt=user_data): 
                         login = True
                         return login, user_data
                     # Der eigentliche Start kommt jetzt 
@@ -51,14 +48,14 @@ def registrationAndLoginMenue():
             os.system('cls')
 
 def main():
-    stayOnMenue = True
+    stay_on_menue = True
     
-    while stayOnMenue:
-        sucess, user_data = registrationAndLoginMenue()
+    while stay_on_menue:
+        sucess, user_data = registration_and_login_menue()
         if sucess:
-            result = ht.StartPLattform(UserID=user_data)
+            result = HABITTRACKER.start_plattform(UserID=user_data)
             if result:
-                Userset = user.UserSetting(user_dt=user_data)
+                Userset = USER.user_setting(user_dt=user_data)
                 if Userset == False:
                     print("Logging out, returning to login menu...")
                     time.sleep(2)
