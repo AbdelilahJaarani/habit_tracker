@@ -3,7 +3,46 @@ from unittest.mock import patch
 from user import User
 from habit import Habit
 from habitTracker import HabitTracker
+from datetime import datetime, timedelta
+from analytics import Analytics
 
+
+@pytest.fixture
+def four_weeks_daily_dates():
+    """
+    Returns a list of 28 consecutive datetime objects, representing 
+    daily completions for a habit over 4 weeks (ending Aug 31, 2025).
+    """
+    base = datetime(2025, 8, 31)
+    return sorted([base - timedelta(days=i) for i in range(28)])
+
+@pytest.fixture
+def mock_get_daily_completion_dates(four_weeks_daily_dates):
+    """
+    Monkeypatch replacement function for Analytics.db._get_completion_dates,
+    always returns a 28-day streak for any habit_id.
+    """
+    def _mock(habit_id):
+        return four_weeks_daily_dates
+    return _mock
+
+@pytest.fixture
+def four_weeks_weekly_dates():
+    """
+    Returns a list of 4 consecutive weekly datetime objects,
+    representing weekly completions for a habit.
+    """
+    base = datetime(2025, 8, 31)
+    return sorted([base - timedelta(weeks=i) for i in range(4)])
+
+@pytest.fixture
+def mock_get_weekly_completion_dates(four_weeks_weekly_dates):
+    """
+    Monkeypatch replacement for weekly habit completions.
+    """
+    def _mock(habit_id):
+        return four_weeks_weekly_dates
+    return _mock
 
 @pytest.fixture
 def user():
@@ -67,3 +106,21 @@ def test_habit_tracker_start_plattform_mark_done_and_return(habit_tracker, mocke
     
     result = habit_tracker.start_plattform({'user_id': 1})
     assert result == True
+
+def test_analytics_longest_streak_daily(monkeypatch, mock_get_daily_completion_dates):
+    """
+    Tests: longest streak for a daily habit is 28 when all days are complete.
+    """
+    analytics = Analytics()
+    monkeypatch.setattr(analytics.db, "_get_completion_dates", mock_get_daily_completion_dates)
+    result = analytics.longest_streak_for_habit(habit_id=1, periodicity="daily")
+    assert result == 28
+
+def test_analytics_longest_streak_weekly(monkeypatch, mock_get_weekly_completion_dates):
+    """
+    Tests: longest streak for a weekly habit is 4 when four consecutive weeks are complete.
+    """
+    analytics = Analytics()
+    monkeypatch.setattr(analytics.db, "_get_completion_dates", mock_get_weekly_completion_dates)
+    result = analytics.longest_streak_for_habit(habit_id=2, periodicity="weekly")
+    assert result == 4

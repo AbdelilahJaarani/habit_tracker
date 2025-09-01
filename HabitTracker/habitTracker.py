@@ -1,5 +1,5 @@
 #Which creates UI for everything
-from HabitTracker.analytics import Analytics
+from analytics import Analytics
 from user import User
 from dataStorage import DataBase as data
 from habit import Habit

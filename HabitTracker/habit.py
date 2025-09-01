@@ -1,430 +1,330 @@
-import sqlite3
-import pandas as pd
-import os
+from habitTemplate import HabitTemplate
+from dataStorage import DataBase
 from datetime import datetime
+import time
+import os
+DATABASE = DataBase()
+HABIT_TEMPLATE = HabitTemplate()
+LOCAL_TIME = time.localtime()
+CHECK = True 
 
-class DataBase:
-    """Lightweight SQLite wrapper for user and habit persistence.
 
-    IMPORTANT:
-    - The database path (DBPATH) below is set for the local machine only.
-    - Each user should adjust DBPATH to point to their own database file location.
-    - Example for Windows:  r"C:\Users\<yourName>\path\to\Habit_Tracker.db"
-    - Example for Mac/Linux:  "/home/<yourName>/path/to/Habit_Tracker.db"
-    - Alternatively, you can use a relative path (e.g., "Habit_Tracker.db" in the current working directory).
-    """
+class Habit:
+    """Interactively create, list, edit, complete, and delete habits for a user."""
 
     def __init__(self):
-        """Opens a SQLite connection and initializes helper objects (cursor, today’s date).
+        """Initialize habit properties and fetch template options (categories, periodicity, weekdays)."""
+        self.habit_id = None
+        self.name = None
+        self.category = HABIT_TEMPLATE.list_catergory()
+        self.description = None
+        self.periodicity = HABIT_TEMPLATE.list_periodicity()
+        self.weekdays = HABIT_TEMPLATE.get_weekdays()
+        self.status = 0
+        self.startDate = datetime.now().strftime("%Y-%m-%d")
 
-        NOTE:
-        - Please adjust the DBPATH to your own local path where your SQLite database is stored.
-        - Use the format shown above for your operating system.
+    def choose_from_list(self,prompt,options):
         """
-        DBPATH = r"C:\Users\abdel\Documents\Habit_Tracker\habit_tracker\Habit_Tracker.db"
-        self.sqliteConnection = sqlite3.connect(DBPATH)
-        self.cursor = self.sqliteConnection.cursor()
-        self.date_today = datetime.now().strftime("%Y-%m-%d")
-
-
-    def save_data_user(self, data):
-        """
-        Create a new user row and return the stored record.
+        Prompt for a selection from numbered options and return the chosen value.
 
         Args:
-            data (dict): Keys 'name', 'email', 'password'.
+            prompt (str): Instructional message to display.
+            options (list[str]): Options to choose from.
         Returns:
-            tuple[bool, dict | None]: (True, user_dict) on success; else (False, None).
-        """    
-        cursor = self.cursor
-        try:
-            if data:
-                cursor.execute(
-                    "INSERT INTO USER (name,email,password) VALUES (?, ?, ?)",
-                    (data["name"], data["email"], data["password"])
-                )
-                self.sqliteConnection.commit()
-                user_id = cursor.lastrowid
-                cursor.execute("SELECT * FROM USER WHERE user_id = ?", (user_id,))
-                user_data = cursor.fetchone()
-                user_id = {"user_id":user_data[0],"name": user_data[1], "email":user_data[2],"password":user_data[3]}
-                return True, user_id
-        except sqlite3.IntegrityError as e:
-            os.system('cls')
-            print(f"The email '{data['email']}' is already used. Please use another one")
-            return False, None
-        except sqlite3.OperationalError as e:
-            print(f"Operational Error: {e}")
-            return False, None
-        
-
-    def load_data_User(self, data):
+            str: The selected option string.
         """
-        Authenticates a user by checking if the combination of email and password exists in the database.
-        
-        Args:
-            data (dict): Must contain 'email' and 'password' as keys. Example:
-                {'email': 'user@example.com', 'password': 'userpassword'}
-        
-        Returns:
-            tuple: (True, user_data) if user is found, otherwise (False, None).
-                user_data contains the (user_id, email, password) tuple from the USER table.
-        
-        Side Effects:
-            Prints error information if a database problem occurs.
-        """
-        cursor = self.cursor
-        try:
-            if data:
-                # Remove possible empty spaces for reliability
-                email = data["email"].strip()
-                password = data["password"].strip()
-
-                cursor.execute(
-                    "SELECT user_id, name, email, password FROM USER WHERE email = ? AND password = ?",
-                    (email, password)
-                )
-                user_data = cursor.fetchone()
-                if user_data is None:
-                    return False, None
+        while True:
+            print(prompt)
+            for i, option in enumerate(options,1):
+                print(f"[{i}]:{option}")
+            try:
+                choice = int(input("> "))
+                if 1 <= choice < len(options)+1:
+                    return options[choice-1] #
                 else:
-                    user_id = {"user_id":user_data[0],"name": user_data[1], "email":user_data[2],"password":user_data[3]}
-                    return True, user_id
-        except sqlite3.IntegrityError as e:
-            print(f"Integrity Error: {e}")
-            return False, None
-        except sqlite3.OperationalError as e:
-            print(f"Operational Error: {e}")
-            return False, None
+                    print("Invalid number! Please try it again.\n")
+            except ValueError:
+                print("Please give a number.\n")
 
-
-    def update_data_user(self,data,part,update):
+    def add(self, user_data):
         """
-        Update a single user field and commit.
+        Collect inputs to create a new habit and persist it. 
 
         Args:
-            data (dict): Must contain 'user_id'.
-            part (str): Column name to update.
-            update (Any): New value for the column.
-        Returns:
-            bool: True if update executed (exceptions print errors).
+            user_data (dict): Must contain 'user_id'. 
         """
-        cursor = self.cursor
-        try:
-            if data:
-                cursor.execute(f"UPDATE USER SET {part} = ? WHERE user_id = ?",
-                               (update,data["user_id"]))
-                self.sqliteConnection.commit()
-            return True
-        except sqlite3.IntegrityError as e:
-            print(f"Integrity Error: {e}")
-        except sqlite3.OperationalError as e:
-            print(f"Operational Error: {e}")
+        NewHabit = {}
+        os.system('cls')
+        print("== New Habit ==")
 
-    def show_only_user_information(self,data):
+        #Category should be choosen 
+        choosen_category = self.choose_from_list(prompt="Choose a Category",options=self.category)
+        self.name = input("What should your habit be?:\n>")
+
+        NewHabit.update({f"user_id":user_data["user_id"],
+                         "category":choosen_category,
+                         "habit":self.name})
+        os.system('cls')
+        self.description = input("Description: \n")
+        if self.description:
+            NewHabit.update({"description": self.description})
+           
+        #Intervall should be choosen
+        choosen_interval = self.choose_from_list(prompt= "In which period do you want to ",options= self.periodicity)
+        NewHabit.update({"periodicity":choosen_interval})
+        if choosen_interval == "weekly":
+            choosen_day = self.choose_from_list(prompt="Which Weekday should the habit be done?", options= self.weekdays)
+            NewHabit.update({"weekday": choosen_day})
+        else:
+            NewHabit.update({"weekday": ''})
+        
+        NewHabit.update({"status":self.status,"startDate":self.startDate})
+        os.system('cls')
+        print("Habit is saving...:\n")
+        #Saving into the Database 
+        
+        time.sleep(2)
+        DATABASE.save_data_Habit(NewHabit)
+
+
+
+    def add_habit_template(self, user_data):
         """
-        Return basic profile info for a user as DataFrame and dict.
+        Offer random templates until accepted; save accepted template as a new habit. 
 
         Args:
-            data (dict): Must contain 'user_id'.
+            user_data (dict): Must contain 'user_id'. 
         Returns:
-            tuple[pd.DataFrame, list[dict]]: (df, records) with user_id, name, email.
+            dict | None: Saved template data on success, or None if exited.
         """
-        try:
-            if data:
-                df = pd.read_sql_query(f"SELECT user_id,name,email FROM USER WHERE user_id = ?",self.sqliteConnection,params=(data["user_id"],))
-                df_to_dict = df.to_dict(orient="records")              
-                return df, df_to_dict
-        except sqlite3.IntegrityError as e:
-            print(f"Integrity Error: {e}")
-        except sqlite3.OperationalError as e:
-            print(f"Operational Error: {e}")
+        TemplateHabit = {}
+        while CHECK: 
+            print(f"Here an daily Habit example:\nCategory: {HABIT_TEMPLATE.template_examples()["category"]} \nHabit: {HABIT_TEMPLATE.template_examples()["habits"]}\nIntervall: {HABIT_TEMPLATE.template_examples()["intervall"]}")
+            choice = input("Do want adding this Habit into your list [y] [n]\nFor exit press [x] ? ")
+            if choice == "y":
+                TemplateHabit.update({"user_id": user_data["user_id"],
+                                      "category": HABIT_TEMPLATE.template_examples()["category"],
+                                      "habit": HABIT_TEMPLATE.template_examples()["habits"], 
+                                      "description": "", 
+                                      "periodicity": "daily",
+                                      "status":self.status,
+                                      "startDate":self.startDate,
+                                      "weekday":''})
+                #self.add(ht.templatesExamples())
+                # print(TemplateHabit)
+                os.system('cls')
+                print("Template is saving...")
+                time.sleep(2)
+                if DATABASE.save_data_Habit(TemplateHabit):
+                    print("Habit Template created :) ! ")
+
+            elif choice == "n":
+                os.system('cls')
+            elif choice == "x":
+                os.system('cls')
+                return None
+   
+            else:
+                os.system('cls')
+                print("Wrong input!")
+                time.sleep(1)
+                os.system('cls')
         
 
-    def delete_data_user (self, user_data, habit_data):
+    def mark_as_completed(self,user_data):
         """
-        Delete a user and their related habit records.
+        For each habit not yet completed today, ask done/not done and record it.
+
+        Args:
+            user_data (dict): Must contain 'user_id'. 
+        """
+        markedHabit = {}
+
+        def bold(text):
+            return f"\033[1m{text}\033[0m"
+        
+        while True:
+            if DATABASE.check_any_habit_in_db(data= user_data):
+
+                _, habitDict = DATABASE.load_data_Habit(data=user_data)
+                if user_data:
+                    for dict in habitDict:
+                        if DATABASE.check_if_habit_already_done(dict):
+                            continue
+                        try:
+                            mark = int(input("Did you complete today:\n"+
+                                        f"{bold(dict["habit"])}""\n"+
+                                        "{:<25} [{}]\n".format("Yes",1) +
+                                        "{:<25} [{}]\n".format("No",2)))
+                            if mark == 1:
+                                # if data.check_if_habit_already_done(data=user_data):
+                                #     print("Habit is already marked as done today!")
+                                print("GOOD JOB!")
+                                markedHabit.update({"habit_id":dict["habit_id"],"completion_date":self.startDate,"status": 1})
+                                DATABASE.mark_complete_habit(markedHabit)
+                                
+                            elif mark ==2:
+                                print("DON'T GIVE UP!\nDo it or try it tomorrow")
+                                markedHabit.update({"habit_id":dict["habit_id"],"completion_date":self.startDate,"status": 0})
+                                DATABASE.mark_complete_habit(markedHabit)
+                            else: 
+                                os.system('cls')
+                                print("Wrong input!")
+                                time.sleep(1)
+                                os.system('cls')
+                        except ValueError:
+                            print("Only Numbers please!")
+                            continue
+                    
+                    break
+            else:
+                print("You don't have any habits! Create first some!")
+                break
+
+
+    def show_habit(self,user):
+        """
+        Return a printable table string of the user's habits.
+
+        Args:
+            user (dict): Must contain 'user_id'.
+        Returns:
+            str: Table string from the database query.
+        """
+        habit_str,_ = DATABASE.load_data_Habit(user)
+        return habit_str
+        
+
+    def edit_habit(self,user_data):
+        """
+        Interactively update a habit's category, name, description, or periodicity.
 
         Args:
             user_data (dict): Must contain 'user_id'.
-            habit_data (list[int]): Habit IDs owned by the user.
-        Returns:
-            bool: True if user row was deleted and committed.
         """
-        cursor = self.cursor        
-        if self.delete_all_habits_after_user_deleted(data=user_data,habitData=habit_data):
+        def update_input(clm):
+            update = input("Write your change:\n" + clm + "\n" +
+                           ">")
+            os.system('cls')
+            return update
+
+        while True:
+            habitString,AllHabitsInList = DATABASE.load_data_Habit(user_data)
+
+            self.habit_id = input("Which Habit do you want to change?\n"+
+                                "Write the habit ID Number please or [x] for exit :\n"+
+                                str(habitString)+"\n"+
+                                "\n"+">")
+            
+            if self.habit_id == "x":
+                os.system('cls')
+                print("back to menue..")
+                time.sleep(2)
+                os.system('cls')
+                break
+                
             try:
-                if user_data:
-                    cursor.execute("DELETE from USER WHERE user_id = ?",
-                                (user_data["user_id"],)
-                                )
-                    self.sqliteConnection.commit()
-                    return True
-                    
-            except sqlite3.IntegrityError as e:
-                print(f"Integrity Error: {e}")
-            except sqlite3.OperationalError as e:
-                print(f"Operational Error: {e}")
-            pass
+                habit_id = int(self.habit_id)
+            except ValueError:
+                print("Only Numbers or x for exit")
+                continue
+            
+            for dict in AllHabitsInList:
+                if habit_id == dict["habit_id"]:
+                    try:
+                        changeInfo = int(input(
+                                    "What do you want to change?\n" +
+                                    "{:<25} [{}]\n".format("Category",1) +      
+                                    "{:<25} [{}]\n".format("Habitname",2) +
+                                    "{:<25} [{}]\n".format("Description",3)+
+                                    "{:<25} [{}]\n".format("Periodicity",4)+
+                                    "{:<25} [{}]\n".format("Exit",0)))
+                        if changeInfo == 1:
+                            choosen_category = self.choose_from_list(prompt="Choose the new Category",options=self.category)
+                            DATABASE.update_data_habit(data=dict,update=choosen_category,part="category")
+                        elif changeInfo == 2:
+                            change = update_input(clm=dict["habit"])
+                            DATABASE.update_data_habit(data=dict,update= change, part="habit")
+                        elif changeInfo == 3:
+                            change = update_input(clm=dict["description"])
+                            DATABASE.update_data_habit(data=dict,update= change, part="description")
+                        elif changeInfo == 4:
+                            choosen_interval = self.choose_from_list(prompt= "In which period do you want to change ",options= self.periodicity)
+                            if choosen_interval == "weekly":
+                                choosen_day = self.choose_from_list(prompt="Which Weekday should the habit be done?", options= self.weekdays)
+                                DATABASE.update_data_habit(data=dict,update=choosen_interval,part="periodicity")
+                                DATABASE.update_data_habit(data=dict,update=choosen_day,part="weekday")
+                            else:
+                                DATABASE.update_data_habit(data=dict,update=choosen_interval,part="periodicity")
+                        elif changeInfo == 0:
+                            break
+                        else:
+                            os.system('cls')
+                            print("Wrong Input")
+                                  
+                    except ValueError:
+                        print("Only Numbers are allowed")
+                        break
 
-
-
-
-    ########################################################## Habit Storage #####################################################################
-
-
-    def mark_complete_habit(self,data):
-        """
-        Insert a habit completion record for a given date and status.
-
-        Args:
-            data (dict): {'habit_id': int, 'completion_date': 'YYYY-MM-DD', 'status': int}.
-        Returns:
-            tuple[bool, dict | None]: (True, data) on success; else (False, None).
-        """
-        cursor = self.cursor
-        try:
-            if data:
-                cursor.execute(
-                    "INSERT INTO habit_completion (habit_id, completion_date, status) VALUES (?, ?, ?)",
-                    (data["habit_id"],data["completion_date"],data["status"])
-                )
-                self.sqliteConnection.commit()
-                return True, data
-        except sqlite3.Error as e:
-            print(f"Integrity Error: {e}")
-            return False, None        
-        
-        pass
-
-    def check_if_habit_already_done(self,data):
-        """
-        Return True if the habit is already completed today (status=1).
-
-        Args:
-            data (dict): Must contain 'habit_id'.
-        Returns:
-            bool: True if a completion exists for today; otherwise False.
-        """
-        cursor = self.cursor
-        try:
-            if data:
-                cursor.execute(f"SELECT habit_id FROM habit_completion WHERE habit_id = ? AND completion_date = ? AND status = ?", 
-                               (data["habit_id"], self.date_today,1))               
-                record = cursor.fetchone()
-                if record:
-                    return True
-                else:
-                    return False
-        except sqlite3.IntegrityError as e:
-            print(f"Integrity Error: {e}")
-        except sqlite3.OperationalError as e:
-            print(f"Operational Error: {e}")
-        
-    def check_any_habit_in_db(self,data):
-        """
-        Return whether the user has at least one habit in storage.
-
-        Args:
-            data (dict): Must contain 'user_id'.
-        Returns:
-            bool: True if a habit row exists; otherwise False.
-        """
-        cursor = self.cursor
-        try:
-            if data:
-                cursor.execute(f"SELECT user_id FROM habits WHERE user_id = ?", 
-                               ( data["user_id"],))               
-                record = cursor.fetchone()
-                if record:
-                    return True
-                else:
-                    return False
-        except sqlite3.IntegrityError as e:
-            print(f"Integrity Error: {e}")
-        except sqlite3.OperationalError as e:
-            print(f"Operational Error: {e}")
-
-
-        
-    def save_data_Habit(self, data):
-        """
-        Insert a new habit for the user.
-
-        Args:
-            data (dict): Keys 'user_id','category','habit','description','periodicity','status','startDate','weekday'.
-        Returns:
-            tuple[bool, dict | None]: (True, data) on success; else (False, None).
-        """
-        cursor = self.cursor
-        try:
-            if data:
-                cursor.execute(
-                    "INSERT INTO habits (user_id,category,habit,description,periodicity,status,startDate,weekday)VALUES (?,?,?,?,?,?,?,?)",
-                    (data["user_id"],data["category"],data["habit"], data["description"], data["periodicity"], data["status"],data["startDate"],data['weekday'])
-                )
-                self.sqliteConnection.commit()
-                return True, data
-        except sqlite3.Error as e:
-            print(f"Integrity Error: {e}")
-            return False, None
-        
-
-    def load_data_Habit(self,data):
-        """
-        Load all habits for a user as DataFrame and dict records.
-
-        Args:
-            data (dict): Must contain 'user_id'.
-        Returns:
-            tuple[pd.DataFrame, list[dict]]: (df, records) with habit fields.
-        """
-        cursor = self.cursor
-        try:
-            if data:
-                df = pd.read_sql_query(f"SELECT habit_id,category,habit,description,periodicity,startDate FROM habits WHERE user_id = ?",self.sqliteConnection,params=(data["user_id"],))
-                df_to_dict = df.to_dict(orient="records")              
-                return df, df_to_dict
-        except sqlite3.IntegrityError as e:
-            print(f"Integrity Error: {e}")
-        except sqlite3.OperationalError as e:
-            print(f"Operational Error: {e}")
-    
-    def get_all_Habit_id(self,data):
-        """
-        Return a list of all habit IDs.
-
-        Args:
-            data (dict): Unused; kept for interface consistency.
-        Returns:
-            list[int]: Habit IDs across all users.
-        """
-        cursor = self.cursor
-        try:
-            if data:
-                cursor.execute(
-                    "SELECT habit_id FROM habits",    
-                )
-                habit_id_list = [row[0] for row in cursor.fetchall()]
-                return habit_id_list
-        except sqlite3.IntegrityError as e:
-            print(f"Integrity Error: {e}")
-        except sqlite3.OperationalError as e:
-            print(f"Operational Error: {e}")
-        
-
-    def update_data_habit(self,data,update,part):
-        """
-        Update a single habit field and commit.
-
-        Args:
-            data (dict): Must contain 'habit_id'.
-            update (Any): New value to set.
-            part (str): Column name to update.
-        """
-        cursor = self.cursor        
-        try:
-            if data:
-                cursor.execute(f"UPDATE habits SET {part} = ? WHERE habit_id = ?",
-                               (update,data["habit_id"]))
-                self.sqliteConnection.commit()
                 
-        except sqlite3.IntegrityError as e:
-            print(f"Integrity Error: {e}")
-        except sqlite3.OperationalError as e:
-            print(f"Operational Error: {e}")
 
-    def show_only_habits(self,data):
+
+    def delete(self,user_data):
         """
-        Return a left-aligned table string of habit names for the user.
+        Prompt for a habit id, confirm, and delete the habit if confirmed.
 
         Args:
-            data (dict): Must contain 'user_id'.
-        Returns:
-            str: Formatted table of habit names.
+            user_data (dict): Must contain 'user_id'.
         """
-        try:
-            if data:
-                df = pd.read_sql_query("SELECT habit AS 'Habits' FROM habits WHERE user_id = ?",
-                                       self.sqliteConnection,
-                                       params=(data["user_id"],))
-                maxlen = df["Habits"].astype(str).str.len().max()
-                formatters = {"Habits":lambda x: f"{x:<{maxlen}}"}
-                return df.to_string(formatters= formatters, justify= "center")
-        except sqlite3.IntegrityError as e:
-            print(f"Integrity Error: {e}")
-        except sqlite3.OperationalError as e:
-            print(f"Operational Error: {e}")        
+        while True:
+            habit_str,all_habits_in_list = DATABASE.load_data_Habit(user_data)
 
-    
-    def delete_data_habit(self, data):
-        """
-        Delete a habit row by its id.
-
-        Args:
-            data (dict): Must contain 'habit_id'.
-        """
-        cursor = self.cursor 
-        try:
-            if data:
-                cursor.execute("DELETE from habits WHERE habit_id = ?",
-                               (data["habit_id"],)
-                               )
-                self.sqliteConnection.commit()
+            self.habit_id = input("Which Habit do you want to delete?\n"+
+                                "Write the habit ID Number please or [x] for exit :\n"+
+                                str(habit_str)+"\n"+
+                                "\n"+">")
+            
+            if self.habit_id == "x":
+                os.system('cls')
+                print("back to menue..")
+                time.sleep(2)
+                os.system('cls')
+                break
+            
                 
-        except sqlite3.IntegrityError as e:
-            print(f"Integrity Error: {e}")
-        except sqlite3.OperationalError as e:
-            print(f"Operational Error: {e}")
-        
-        
-    def delete_all_habits_after_user_deleted(self,data,habitData):
-        """
-    Delete all habit data for a user after the user record is removed.
+            try:
+                habit_id = int(self.habit_id)
+            except ValueError:
+                print("Only Numbers or x for exit")
+                os.system('cls')
+                continue
+            
+            for dict in all_habits_in_list:
+                if habit_id == dict["habit_id"]:
+                    try:
+                        os.system('cls')
+                        mark = int(input("Are you sure to delete :\n"+
+                        f"{(dict["habit"])}""\n"+
+                        "{:<25} [{}]\n".format("Yes",1) +
+                        "{:<25} [{}]\n".format("No",2)))
 
-    Deletes completions for each habit_id in habitData, then deletes the
-    user's habits, and commits the transaction.
-    Args:
-        data (dict): User dict containing 'user_id'.
-        habitData (list[int] | list[str]): Habit IDs associated with the user.
-    Returns:
-        bool: True if deletion and commit succeeded; otherwise None.
-    Raises:
-        sqlite3.IntegrityError: If a foreign key or integrity constraint fails.
-        sqlite3.OperationalError: For SQL execution or database operation issues.
-    """
-        cursor = self.cursor        
-        try:
-            if data:
-                for habit_id in habitData:
-                    cursor.execute("DELETE from habit_completion WHERE habit_id = ?",
-                                (habit_id,)
-                                )
-                cursor.execute("DELETE from habits WHERE user_id = ?",
-                            (data["user_id"],)
-                            )
-                self.sqliteConnection.commit()
-                return True                   
-        except sqlite3.IntegrityError as e:
-            print(f"Integrity Error: {e}")
-        except sqlite3.OperationalError as e:
-            print(f"Operational Error: {e}")
+                        if mark == 1:
+                            os.system('cls')
+                            print("Deleting...")
+                            time.sleep(2)
+                            if DATABASE.delete_data_habit(data=dict):
+                                os.system('cls')
+                                print("Habit deleted!")
+                                os.system('cls')
+                        elif mark == 2: 
+                            break
+                        else: 
+                            os.system('cls')
+                            print("Wrong input!")
+                            time.sleep(1)
+                            os.system('cls')
+                            break        
+                    except ValueError:
+                        print("Only Numbers are allowed")
+                        break
         
-    def _get_completion_dates(self, habit_id):
-        """
-    Return ordered completion dates (as datetime) for a given habit.
-
-    Fetches status=1 completions for habit_id and converts them from
-    'YYYY-MM-DD' strings to datetime objects, sorted ascending.
-    Args:
-        habit_id (int | str): The habit identifier.
-    Returns:
-        list[datetime]: Completion dates ordered by completion_date.
-    """
-        cursor = self.cursor
-        cursor.execute(
-            "SELECT completion_date FROM habit_completion WHERE habit_id = ? AND status = 1 ORDER BY completion_date",
-            (habit_id,))
-        dates = cursor.fetchall()
-        dates_dt = [datetime.strptime(d[0], "%Y-%m-%d") for d in dates]
-        return dates_dt
