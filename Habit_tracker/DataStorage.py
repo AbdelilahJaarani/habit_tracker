@@ -4,10 +4,23 @@ import os
 from datetime import datetime
 
 class DataBase:
-    """Lightweight SQLite wrapper for user and habit persistence."""
+    """Lightweight SQLite wrapper for user and habit persistence.
+
+    IMPORTANT:
+    - The database path (DBPATH) below is set for the local machine only.
+    - Each user should adjust DBPATH to point to their own database file location.
+    - Example for Windows:  r"C:\Users\<yourName>\path\to\Habit_Tracker.db"
+    - Example for Mac/Linux:  "/home/<yourName>/path/to/Habit_Tracker.db"
+    - Alternatively, you can use a relative path (e.g., "Habit_Tracker.db" in the current working directory).
+    """
 
     def __init__(self):
-        """Open a SQLite connection and prepare helpers (cursor, today date)."""
+        """Opens a SQLite connection and initializes helper objects (cursor, today’s date).
+
+        NOTE:
+        - Please adjust the DBPATH to your own local path where your SQLite database is stored.
+        - Use the format shown above for your operating system.
+        """
         DBPATH = r"C:\Users\abdel\Documents\Habit_Tracker\habit_tracker\Habit_Tracker.db"
         self.sqliteConnection = sqlite3.connect(DBPATH)
         self.cursor = self.sqliteConnection.cursor()
